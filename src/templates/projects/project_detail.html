@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <h1>{{ project.title }}</h1>
+        <h6 class="card-subtitle mb-2 text-muted">
+            Руководитель: {{ project.creator.get_full_name|default:project.creator.username }}
+        </h6>
+    </div>
+    <div class="card-body">
+        <h4>Описание</h4>
+        <p>{{ project.description|linebreaksbr }}</p>
+        <hr>
+
+        <h4>Теги проекта</h4>
+        <p>
+            {% for tag in project.tags.all %}
+                <span class="badge bg-primary">{{ tag.name }}</span>
+            {% empty %}
+                <span class="text-muted">Теги не указаны.</span>
+            {% endfor %}
+        </p>
+        <hr>
+
+        <h4>Участники ({{ project.participants.count }}/{{ project.max_participants }})</h4>
+        <ul>
+            {% for participant in project.participants.all %}
+                <li>{{ participant.get_full_name|default:participant.username }}</li>
+            {% empty %}
+                <li>Еще нет ни одного участника.</li>
+            {% endfor %}
+        </ul>
+        <hr>
+
+        <h4>Ключевая информация</h4>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Статус:</strong> {{ project.get_status_display }}</li>
+            <li class="list-group-item"><strong>Дедлайн подачи заявок:</strong> {{ project.application_deadline }}</li>
+            <li class="list-group-item"><strong>Дата завершения:</strong> {{ project.end_date }}</li>
+        </ul>
+        <hr>
+        
+        {% if project.milestones %}
+        <h4>Контрольные точки</h4>
+        <p>{{ project.milestones|linebreaksbr }}</p>
+        {% endif %}
+        
+    </div>
+    <div class="card-footer">
+        <!-- Здесь будет логика подачи заявки -->
+        <a href="#" class="btn btn-success">Подать заявку</a>
+    </div>
+</div>
+{% endblock %}

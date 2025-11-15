@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Список проектов{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Все проекты</h1>
+    {% if user.is_authenticated and user.is_teacher %}
+        <a href="{% url 'projects:project-create' %}" class="btn btn-primary">Создать новый проект</a>
+    {% endif %}
+</div>
+
+{% if project_list %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for project in project_list %}
+            <div class="col">
+                <a href="{{ project.get_absolute_url }}" class="card-project-link">
+                    <div class="card h-100 card-project">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ project.title }}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Руководитель: {{ project.creator.get_full_name|default:project.creator.username }}
+                            </h6>
+                            <p class="card-text">
+                                {{ project.description|truncatewords:20 }}
+                            </p>
+                            <div>
+                                {% for tag in project.tags.all %}
+                                    <span class="badge bg-secondary">{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="card-footer text-muted">
+                            Мест: {{ project.participants.count }}/{{ project.max_participants }}
+                        </div>
+                    </div>
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        Пока нет ни одного активного проекта.
+    </div>
+{% endif %}
+
+{% if is_paginated %}
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">Первая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Первая</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Предыдущая</span>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Следующая</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Последняя</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+{% endblock %}

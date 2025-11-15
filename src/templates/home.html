@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}
+Главная - {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Платформа студенческих проектов</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Найдите интересный проект для своего портфолио, присоединяйтесь к команде единомышленников или создайте собственный проект под руководством преподавателя.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'projects:project-list' %}" class="btn btn-primary btn-lg px-4 gap-3">Смотреть все проекты</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'users:signup' %}" class="btn btn-outline-secondary btn-lg px-4">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="pb-2 border-bottom">Рекомендованные проекты</h2>
+    <!-- Здесь будет цикл для вывода рекомендованных проектов -->
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        
+        <!-- Пример карточки проекта (позже будет в цикле) -->
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">Разработка системы рекомендаций</h5>
+                    <p class="card-text">Краткое описание проекта. Цель - создание алгоритма ML для подбора фильмов пользователям на основе их оценок.</p>
+                    <div class="mb-2">
+                        <span class="badge bg-primary">Machine Learning</span>
+                        <span class="badge bg-secondary">Python</span>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <a href="#" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        <!-- Конец примера -->
+
+    </div>
+</div>
+{% endblock %}

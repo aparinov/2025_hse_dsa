@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Выход{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 text-center">
+        <h2>Вы вышли из системы</h2>
+        <p>Вы успешно вышли из своего аккаунта. Ждем вас снова!</p>
+        <a href="{% url 'users:login' %}" class="btn btn-primary">Войти снова</a>
+    </div>
+</div>
+{% endblock %}
