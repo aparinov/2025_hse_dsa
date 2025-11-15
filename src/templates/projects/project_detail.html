@@ -50,8 +50,39 @@
         
     </div>
     <div class="card-footer">
-        <!-- Здесь будет логика подачи заявки -->
-        <a href="#" class="btn btn-success">Подать заявку</a>
+        {% if user.is_authenticated %}
+            {% if user == project.creator %}
+                <!-- Кнопки для создателя проекта (преподавателя) -->
+                <a href="{% url 'projects:manage-applications' pk=project.pk %}" class="btn btn-primary">
+                    Управление заявками
+                    {% if pending_applications_count > 0 %}
+                        <span class="badge bg-light text-dark">{{ pending_applications_count }}</span>
+                    {% endif %}
+                </a>
+            {% elif user.is_student %}
+                <!-- Кнопки для студента -->
+                {% if user in project.participants.all %}
+                    <button class="btn btn-success" disabled>Вы участник этого проекта</button>
+                {% elif user_application %}
+                    {% if user_application.status == 'PENDING' %}
+                        <button class="btn btn-warning" disabled>Заявка на рассмотрении</button>
+                    {% elif user_application.status == 'APPROVED' %}
+                        <button class="btn btn-success" disabled>Заявка принята</button>
+                    {% elif user_application.status == 'REJECTED' %}
+                        <button class="btn btn-danger" disabled>Заявка отклонена</button>
+                    {% endif %}
+                {% elif project.status == 'RECRUITMENT' and project.participants.count < project.max_participants %}
+                    <form method="post" action="{% url 'projects:application-create' project_pk=project.pk %}" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-success">Подать заявку</button>
+                    </form>
+                {% else %}
+                    <button class="btn btn-secondary" disabled>Набор закрыт</button>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-primary">Войдите, чтобы подать заявку</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

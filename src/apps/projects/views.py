@@ -1,9 +1,13 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import IntegrityError
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, View
 
 from .forms import ProjectForm
-from .models import Project
+from .models import Project, Application
 
 class ProjectListView(ListView):
     """
@@ -33,7 +37,24 @@ class ProjectDetailView(DetailView):
     def get_queryset(self):
         """Оптимизируем запрос к БД, подгружая связанные данные."""
         queryset = super().get_queryset()
-        return queryset.select_related('creator').prefetch_related('tags', 'participants')
+        return queryset.select_related('creator').prefetch_related('tags', 'participants', 'applications')
+    
+    def get_context_data(self, **kwargs):
+        """Добавляем информацию о заявке текущего пользователя и счетчик заявок."""
+        context = super().get_context_data(**kwargs)
+        
+        # Считаем количество заявок на рассмотрении (для преподавателя)
+        context['pending_applications_count'] = self.object.applications.filter(
+            status=Application.Status.PENDING
+        ).count()
+        
+        # Проверяем заявку текущего пользователя (для студента)
+        if self.request.user.is_authenticated:
+            context['user_application'] = self.object.applications.filter(
+                student=self.request.user
+            ).first()
+        
+        return context
 
 
 class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
@@ -66,3 +87,134 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         после успешного создания.
         """
         return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.pk})
+
+
+class ApplicationCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Представление для подачи заявки на участие в проекте.
+    Доступно только для студентов.
+    """
+    
+    def test_func(self):
+        """Проверяет, что пользователь - студент."""
+        return self.request.user.is_student
+    
+    def post(self, request, project_pk):
+        """Обрабатывает подачу заявки."""
+        project = get_object_or_404(Project, pk=project_pk)
+        
+        # Проверка: студент не может подать заявку на свой проект
+        if project.creator == request.user:
+            messages.error(request, 'Вы не можете подать заявку на собственный проект.')
+            return redirect('projects:project-detail', pk=project_pk)
+        
+        # Проверка: студент уже участвует в проекте
+        if project.participants.filter(pk=request.user.pk).exists():
+            messages.info(request, 'Вы уже участвуете в этом проекте.')
+            return redirect('projects:project-detail', pk=project_pk)
+        
+        # Создаем заявку (unique_together защитит от дублей)
+        try:
+            Application.objects.create(
+                project=project,
+                student=request.user,
+                status=Application.Status.PENDING
+            )
+            messages.success(request, 'Ваша заявка успешно отправлена!')
+        except IntegrityError:
+            messages.warning(request, 'Вы уже подали заявку на этот проект.')
+        
+        return redirect('projects:project-detail', pk=project_pk)
+
+
+class ManageApplicationsView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    """
+    Представление для управления заявками на проект.
+    Доступно только создателю проекта (преподавателю).
+    """
+    model = Project
+    template_name = 'projects/manage_applications.html'
+    context_object_name = 'project'
+    
+    def test_func(self):
+        """Проверяет, что пользователь - создатель проекта."""
+        project = self.get_object()
+        return self.request.user == project.creator
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Получаем все заявки на проект, сортированные по статусу и дате
+        context['applications'] = self.object.applications.select_related('student').order_by(
+            'status', '-created_at'
+        )
+        return context
+
+
+class ApproveApplicationView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Представление для принятия заявки.
+    Доступно только создателю проекта.
+    """
+    
+    def test_func(self):
+        """Проверяет, что пользователь - создатель проекта."""
+        application = get_object_or_404(Application, pk=self.kwargs.get('pk'))
+        return self.request.user == application.project.creator
+    
+    def post(self, request, pk):
+        """Принимает заявку и добавляет студента в участники."""
+        application = get_object_or_404(Application, pk=pk)
+        project = application.project
+        
+        # Проверка: есть ли еще места в проекте
+        if project.participants.count() >= project.max_participants:
+            messages.error(request, 'В проекте больше нет свободных мест.')
+            return redirect('projects:manage-applications', pk=project.pk)
+        
+        # Меняем статус заявки
+        application.status = Application.Status.APPROVED
+        application.save()
+        
+        # Добавляем студента в участники
+        project.participants.add(application.student)
+        
+        messages.success(
+            request, 
+            f'Заявка от {application.student.get_full_name() or application.student.username} принята.'
+        )
+        
+        # Проверяем, заполнены ли все места
+        if project.participants.count() >= project.max_participants:
+            project.status = Project.Status.IN_PROGRESS
+            project.save()
+            messages.info(request, 'Все места в проекте заполнены. Статус изменен на "В процессе".')
+        
+        return redirect('projects:manage-applications', pk=project.pk)
+
+
+class RejectApplicationView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Представление для отклонения заявки.
+    Доступно только создателю проекта.
+    """
+    
+    def test_func(self):
+        """Проверяет, что пользователь - создатель проекта."""
+        application = get_object_or_404(Application, pk=self.kwargs.get('pk'))
+        return self.request.user == application.project.creator
+    
+    def post(self, request, pk):
+        """Отклоняет заявку."""
+        application = get_object_or_404(Application, pk=pk)
+        project = application.project
+        
+        # Меняем статус заявки
+        application.status = Application.Status.REJECTED
+        application.save()
+        
+        messages.success(
+            request,
+            f'Заявка от {application.student.get_full_name() or application.student.username} отклонена.'
+        )
+        
+        return redirect('projects:manage-applications', pk=project.pk)
