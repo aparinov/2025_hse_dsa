@@ -1,10 +1,14 @@
 
 docker-compose down -v
+
 docker-compose up -d --build --force-recreate
+
 docker-compose exec web python src/manage.py seed_db
 
 docker-compose exec db psql -U user -d student_projects_db
+
 SELECT id, username, email, role FROM users_user;
+
 SELECT COUNT(*) FROM projects_project;
 
 # Платформа студенческих проектов
