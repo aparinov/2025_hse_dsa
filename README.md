@@ -1,11 +1,15 @@
 
-docker-compose down -v
+Останавливаем: docker-compose down
 
-docker-compose up -d --build --force-recreate
+Поднимаем: docker-compose up -d --build --force-recreate
+
+Запускаем тесты: docker-compose exec -T web python src/manage.py test apps.users apps.projects --verbosity=2
+
+Заполняем бд фигней (только если запускаем с нуля или остановили с флагом -v):
 
 docker-compose exec web python src/manage.py seed_db
 
-docker-compose exec db psql -U user -d student_projects_db
+Подключаемся к бд с помощью psql (из CLI): docker-compose exec db psql -U user -d student_projects_db
 
 SELECT id, username, email, role FROM users_user;
 

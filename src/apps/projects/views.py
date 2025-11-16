@@ -1,10 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db import IntegrityError
-from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
-from django.views.generic import ListView, DetailView, CreateView, View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 
 from .forms import ProjectForm
 from .models import Project, Application
@@ -89,6 +87,25 @@ class ProjectCreateView(LoginRequiredMixin, UserPassesTestMixin, CreateView):
         return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.pk})
 
 
+class ProjectUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    """
+    Представление для редактирования проекта.
+    Доступно только создателю проекта.
+    """
+    model = Project
+    form_class = ProjectForm
+    template_name = 'projects/project_form.html'
+    
+    def test_func(self):
+        """Проверяет, что пользователь - создатель проекта."""
+        project = self.get_object()
+        return self.request.user == project.creator
+    
+    def get_success_url(self):
+        """Перенаправляем на страницу проекта после обновления."""
+        return reverse_lazy('projects:project-detail', kwargs={'pk': self.object.pk})
+
+
 class ApplicationCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
     """
     Представление для подачи заявки на участие в проекте.
@@ -113,16 +130,18 @@ class ApplicationCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
             messages.info(request, 'Вы уже участвуете в этом проекте.')
             return redirect('projects:project-detail', pk=project_pk)
         
-        # Создаем заявку (unique_together защитит от дублей)
-        try:
-            Application.objects.create(
-                project=project,
-                student=request.user,
-                status=Application.Status.PENDING
-            )
-            messages.success(request, 'Ваша заявка успешно отправлена!')
-        except IntegrityError:
+        # Проверка: студент уже подал заявку
+        if Application.objects.filter(project=project, student=request.user).exists():
             messages.warning(request, 'Вы уже подали заявку на этот проект.')
+            return redirect('projects:project-detail', pk=project_pk)
+        
+        # Создаем заявку
+        Application.objects.create(
+            project=project,
+            student=request.user,
+            status=Application.Status.PENDING
+        )
+        messages.success(request, 'Ваша заявка успешно отправлена!')
         
         return redirect('projects:project-detail', pk=project_pk)
 

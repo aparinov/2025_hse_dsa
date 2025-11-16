@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    ProjectListView, ProjectDetailView, ProjectCreateView,
+    ProjectListView, ProjectDetailView, ProjectCreateView, ProjectUpdateView,
     ApplicationCreateView, ManageApplicationsView,
     ApproveApplicationView, RejectApplicationView
 )
@@ -16,6 +16,9 @@ urlpatterns = [
     
     # Детальная страница проекта
     path('<int:pk>/', ProjectDetailView.as_view(), name='project-detail'),
+    
+    # Редактирование проекта
+    path('<int:pk>/edit/', ProjectUpdateView.as_view(), name='project-update'),
     
     # Подача заявки на проект
     path('<int:project_pk>/apply/', ApplicationCreateView.as_view(), name='application-create'),
