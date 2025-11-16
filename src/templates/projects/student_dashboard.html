@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Мои заявки и проекты{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Мои заявки и проекты</h1>
+
+<!-- Блок: Мои заявки -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Мои заявки</h4>
+    </div>
+    <div class="card-body">
+        {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Проект</th>
+                            <th>Руководитель</th>
+                            <th>Дата подачи</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>
+                                <a href="{{ application.project.get_absolute_url }}">
+                                    <strong>{{ application.project.title }}</strong>
+                                </a>
+                                <br>
+                                <small class="text-muted">{{ application.project.description|truncatewords:15 }}</small>
+                                <br>
+                                <div class="mt-1">
+                                    {% for tag in application.project.tags.all %}
+                                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td>
+                                {{ application.project.creator.get_full_name|default:application.project.creator.username }}
+                            </td>
+                            <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'APPROVED' %}
+                                    <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'REJECTED' %}
+                                    <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                    <button class="btn btn-sm btn-outline-danger" disabled title="Функция в разработке">
+                                        Отозвать
+                                    </button>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Вы еще не подали ни одной заявки на проекты.
+                <a href="{% url 'projects:project-list' %}" class="alert-link">Посмотреть доступные проекты</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Блок: Я участник -->
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Я участник</h4>
+    </div>
+    <div class="card-body">
+        {% if participating_projects %}
+            <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for project in participating_projects %}
+                    <div class="col">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">
+                                    <a href="{{ project.get_absolute_url }}">{{ project.title }}</a>
+                                </h5>
+                                <h6 class="card-subtitle mb-2 text-muted">
+                                    Руководитель: {{ project.creator.get_full_name|default:project.creator.username }}
+                                </h6>
+                                <p class="card-text">{{ project.description|truncatewords:20 }}</p>
+                                <div class="mb-2">
+                                    {% for tag in project.tags.all %}
+                                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-muted small">
+                                    <span class="badge bg-info text-dark">{{ project.get_status_display }}</span>
+                                    <span class="ms-2">Участников: {{ project.participants.count }}/{{ project.max_participants }}</span>
+                                </div>
+                            </div>
+                            <div class="card-footer">
+                                <small class="text-muted">Завершение: {{ project.end_date|date:"d.m.Y" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Вы пока не участвуете ни в одном проекте. После принятия ваших заявок, проекты появятся здесь.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+

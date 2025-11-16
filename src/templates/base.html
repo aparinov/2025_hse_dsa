@@ -33,6 +33,10 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'projects:project-create' %}">Создать проект</a>
                         </li>
+                        {% elif user.is_authenticated and user.is_student %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'projects:student-dashboard' %}">Мои заявки</a>
+                        </li>
                         {% endif %}
                     </ul>
                     <ul class="navbar-nav">
@@ -45,6 +49,8 @@
                                     <li><a class="dropdown-item" href="{% url 'users:profile' %}">Мой профиль</a></li>
                                     {% if user.is_teacher %}
                                         <li><a class="dropdown-item" href="{% url 'projects:teacher-dashboard' %}">Мои проекты</a></li>
+                                    {% elif user.is_student %}
+                                        <li><a class="dropdown-item" href="{% url 'projects:student-dashboard' %}">Мои заявки</a></li>
                                     {% endif %}
                                     <li><hr class="dropdown-divider"></li>
                                     <li><a class="dropdown-item" href="{% url 'users:logout' %}">Выйти</a></li>

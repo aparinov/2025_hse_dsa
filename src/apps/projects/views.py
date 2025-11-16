@@ -59,6 +59,47 @@ class TeacherDashboardView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         ).order_by('-created_at')
 
 
+class StudentDashboardView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Личный кабинет студента - заявки и проекты, где он участвует.
+    Доступно только для пользователей с ролью 'Студент'.
+    """
+    model = Application
+    template_name = 'projects/student_dashboard.html'
+    context_object_name = 'applications'
+    
+    def test_func(self):
+        """Проверяет, является ли пользователь студентом."""
+        return self.request.user.is_student
+    
+    def get_queryset(self):
+        """
+        Возвращает заявки текущего студента с оптимизацией запросов.
+        """
+        queryset = super().get_queryset()
+        return queryset.filter(
+            student=self.request.user
+        ).select_related(
+            'project__creator'
+        ).prefetch_related(
+            'project__tags'
+        ).order_by('-created_at')
+    
+    def get_context_data(self, **kwargs):
+        """
+        Добавляет в контекст проекты, где студент является участником.
+        """
+        context = super().get_context_data(**kwargs)
+        context['participating_projects'] = Project.objects.filter(
+            participants=self.request.user
+        ).select_related(
+            'creator'
+        ).prefetch_related(
+            'tags'
+        ).order_by('-created_at')
+        return context
+
+
 class ProjectDetailView(DetailView):
     """
     Представление для детального просмотра одного проекта.

@@ -876,3 +876,164 @@ class TeacherDashboardViewTests(TestCase):
         self.assertEqual(project_list[0], project2)
         self.assertEqual(project_list[1], project1)
 
+
+class StudentDashboardViewTests(TestCase):
+    """Интеграционные тесты для личного кабинета студента."""
+    
+    def setUp(self):
+        self.client = Client()
+        self.student = User.objects.create_user(
+            username='student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        self.teacher = User.objects.create_user(
+            username='teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.url = reverse('projects:student-dashboard')
+    
+    def test_anonymous_user_redirected_to_login(self):
+        """Анонимный пользователь перенаправляется на логин."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/users/login/', response.url)
+    
+    def test_teacher_cannot_access_student_dashboard(self):
+        """Преподаватель не может получить доступ к личному кабинету студента."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_student_can_access_dashboard(self):
+        """Студент может открыть свой личный кабинет."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'projects/student_dashboard.html')
+    
+    def test_displays_student_applications(self):
+        """Личный кабинет показывает заявки студента."""
+        project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        application = Application.objects.create(
+            project=project,
+            student=self.student,
+            status=Application.Status.PENDING
+        )
+        
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertIn(application, response.context['applications'])
+    
+    def test_does_not_display_other_students_applications(self):
+        """Личный кабинет не показывает заявки других студентов."""
+        other_student = User.objects.create_user(
+            username='other_student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        own_application = Application.objects.create(
+            project=project,
+            student=self.student,
+            status=Application.Status.PENDING
+        )
+        other_application = Application.objects.create(
+            project=project,
+            student=other_student,
+            status=Application.Status.PENDING
+        )
+        
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertIn(own_application, response.context['applications'])
+        self.assertNotIn(other_application, response.context['applications'])
+    
+    def test_displays_participating_projects(self):
+        """Личный кабинет показывает проекты, где студент участвует."""
+        project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        project.participants.add(self.student)
+        
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertIn(project, response.context['participating_projects'])
+    
+    def test_does_not_display_projects_where_not_participant(self):
+        """Не показывает проекты, где студент не участвует."""
+        project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertNotIn(project, response.context['participating_projects'])
+    
+    def test_empty_dashboard_when_no_applications_or_projects(self):
+        """Личный кабинет корректно отображается без заявок и проектов."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['applications']), 0)
+        self.assertEqual(len(response.context['participating_projects']), 0)
+    
+    def test_applications_ordered_by_creation_date(self):
+        """Заявки сортируются по дате создания (новые первыми)."""
+        project1 = Project.objects.create(
+            title='Project 1',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        project2 = Project.objects.create(
+            title='Project 2',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        
+        application1 = Application.objects.create(
+            project=project1,
+            student=self.student
+        )
+        application2 = Application.objects.create(
+            project=project2,
+            student=self.student
+        )
+        
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        
+        applications_list = list(response.context['applications'])
+        self.assertEqual(applications_list[0], application2)
+        self.assertEqual(applications_list[1], application1)
+
