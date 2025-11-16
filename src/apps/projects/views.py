@@ -313,3 +313,57 @@ class RejectApplicationView(LoginRequiredMixin, UserPassesTestMixin, View):
         )
         
         return redirect('projects:manage-applications', pk=project.pk)
+
+
+class ArchiveProjectView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Представление для архивации проекта.
+    Доступно только создателю проекта.
+    """
+    
+    def test_func(self):
+        """Проверяет, что пользователь - создатель проекта."""
+        project = get_object_or_404(Project, pk=self.kwargs.get('pk'))
+        return self.request.user == project.creator
+    
+    def post(self, request, pk):
+        """Переводит проект в статус ARCHIVED."""
+        project = get_object_or_404(Project, pk=pk)
+        
+        # Меняем статус проекта на ARCHIVED
+        project.status = Project.Status.ARCHIVED
+        project.save()
+        
+        messages.success(
+            request,
+            f'Проект "{project.title}" успешно архивирован.'
+        )
+        
+        return redirect('projects:teacher-dashboard')
+
+
+class WithdrawApplicationView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Представление для отзыва заявки студентом.
+    Доступно только студенту, подавшему заявку.
+    """
+    
+    def test_func(self):
+        """Проверяет, что пользователь - студент и автор заявки."""
+        application = get_object_or_404(Application, pk=self.kwargs.get('pk'))
+        return self.request.user.is_student and self.request.user == application.student
+    
+    def post(self, request, pk):
+        """Удаляет заявку студента."""
+        application = get_object_or_404(Application, pk=pk)
+        project_title = application.project.title
+        
+        # Удаляем заявку
+        application.delete()
+        
+        messages.success(
+            request,
+            f'Ваша заявка на проект "{project_title}" успешно отозвана.'
+        )
+        
+        return redirect('projects:student-dashboard')

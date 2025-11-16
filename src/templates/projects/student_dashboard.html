@@ -54,7 +54,7 @@
                             </td>
                             <td>
                                 {% if application.status == 'PENDING' %}
-                                    <button class="btn btn-sm btn-outline-danger" disabled title="Функция в разработке">
+                                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#withdrawModal{{ application.pk }}">
                                         Отозвать
                                     </button>
                                 {% else %}
@@ -66,6 +66,34 @@
                     </tbody>
                 </table>
             </div>
+            
+            <!-- Модальные окна подтверждения отзыва заявок -->
+            {% for application in applications %}
+                {% if application.status == 'PENDING' %}
+                <div class="modal fade" id="withdrawModal{{ application.pk }}" tabindex="-1" aria-labelledby="withdrawModalLabel{{ application.pk }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="withdrawModalLabel{{ application.pk }}">Подтверждение отзыва заявки</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Вы уверены, что хотите отозвать заявку на проект <strong>"{{ application.project.title }}"</strong>?
+                                <br><br>
+                                Вы сможете подать заявку повторно позже.
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                                <form method="post" action="{% url 'projects:application-withdraw' pk=application.pk %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Отозвать заявку</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
         {% else %}
             <div class="alert alert-info" role="alert">
                 Вы еще не подали ни одной заявки на проекты.

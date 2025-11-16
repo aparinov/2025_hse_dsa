@@ -1037,3 +1037,185 @@ class StudentDashboardViewTests(TestCase):
         self.assertEqual(applications_list[0], application2)
         self.assertEqual(applications_list[1], application1)
 
+
+class ArchiveProjectViewTests(TestCase):
+    """Интеграционные тесты для архивации проекта."""
+    
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user(
+            username='teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.other_teacher = User.objects.create_user(
+            username='other_teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.student = User.objects.create_user(
+            username='student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        self.project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        self.url = reverse('projects:project-archive', kwargs={'pk': self.project.pk})
+    
+    def test_anonymous_user_redirected_to_login(self):
+        """Анонимный пользователь перенаправляется на логин."""
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/users/login/', response.url)
+    
+    def test_only_creator_can_archive_project(self):
+        """Только создатель проекта может его архивировать."""
+        self.client.login(username='other_teacher', password='testpass123')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_student_cannot_archive_project(self):
+        """Студент не может архивировать проект."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_creator_can_archive_project(self):
+        """Создатель может архивировать свой проект."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(self.url)
+        
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.status, Project.Status.ARCHIVED)
+    
+    def test_archive_redirects_to_teacher_dashboard(self):
+        """После архивации происходит редирект в личный кабинет."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(self.url)
+        
+        self.assertRedirects(response, reverse('projects:teacher-dashboard'))
+    
+    def test_archive_shows_success_message(self):
+        """После архивации показывается сообщение об успехе."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(self.url)
+        
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any('архивирован' in str(m) for m in messages))
+    
+    def test_archived_project_not_in_general_list(self):
+        """Архивный проект не отображается в общем списке."""
+        self.client.login(username='teacher', password='testpass123')
+        self.client.post(self.url)
+        
+        # Проверяем общий список проектов
+        list_response = self.client.get(reverse('projects:project-list'))
+        self.assertNotIn(self.project, list_response.context['project_list'])
+    
+    def test_archived_project_still_in_teacher_dashboard(self):
+        """Архивный проект остается в личном кабинете преподавателя."""
+        self.client.login(username='teacher', password='testpass123')
+        self.client.post(self.url)
+        
+        # Проверяем личный кабинет
+        dashboard_response = self.client.get(reverse('projects:teacher-dashboard'))
+        self.assertIn(self.project, dashboard_response.context['project_list'])
+
+
+class WithdrawApplicationViewTests(TestCase):
+    """Интеграционные тесты для отзыва заявки студентом."""
+    
+    def setUp(self):
+        self.client = Client()
+        self.student = User.objects.create_user(
+            username='student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        self.other_student = User.objects.create_user(
+            username='other_student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        self.teacher = User.objects.create_user(
+            username='teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        self.application = Application.objects.create(
+            project=self.project,
+            student=self.student,
+            status=Application.Status.PENDING
+        )
+        self.url = reverse('projects:application-withdraw', kwargs={'pk': self.application.pk})
+    
+    def test_anonymous_user_redirected_to_login(self):
+        """Анонимный пользователь перенаправляется на логин."""
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/users/login/', response.url)
+    
+    def test_teacher_cannot_withdraw_application(self):
+        """Преподаватель не может отозвать заявку студента."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_other_student_cannot_withdraw_application(self):
+        """Другой студент не может отозвать чужую заявку."""
+        self.client.login(username='other_student', password='testpass123')
+        response = self.client.post(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_student_can_withdraw_own_application(self):
+        """Студент может отозвать свою заявку."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.post(self.url)
+        
+        # Проверяем, что заявка удалена
+        self.assertFalse(Application.objects.filter(pk=self.application.pk).exists())
+    
+    def test_withdraw_redirects_to_student_dashboard(self):
+        """После отзыва происходит редирект в личный кабинет студента."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.post(self.url)
+        
+        self.assertRedirects(response, reverse('projects:student-dashboard'))
+    
+    def test_withdraw_shows_success_message(self):
+        """После отзыва показывается сообщение об успехе."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.post(self.url)
+        
+        messages = list(response.wsgi_request._messages)
+        self.assertTrue(any('отозвана' in str(m) for m in messages))
+    
+    def test_student_can_reapply_after_withdraw(self):
+        """Студент может подать заявку повторно после отзыва."""
+        self.client.login(username='student', password='testpass123')
+        
+        # Отзываем заявку
+        self.client.post(self.url)
+        
+        # Подаем заявку заново
+        apply_url = reverse('projects:application-create', kwargs={'project_pk': self.project.pk})
+        response = self.client.post(apply_url)
+        
+        # Проверяем, что новая заявка создана
+        self.assertEqual(Application.objects.filter(
+            project=self.project,
+            student=self.student
+        ).count(), 1)
+

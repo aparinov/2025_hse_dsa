@@ -49,7 +49,7 @@
                                         Редактировать
                                     </a>
                                     {% if project.status != 'ARCHIVED' %}
-                                        <button class="btn btn-outline-danger btn-sm" disabled>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#archiveModal{{ project.pk }}">
                                             Архивировать
                                         </button>
                                     {% else %}
@@ -63,6 +63,32 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- Модальное окно подтверждения архивации для каждого проекта -->
+            {% if project.status != 'ARCHIVED' %}
+            <div class="modal fade" id="archiveModal{{ project.pk }}" tabindex="-1" aria-labelledby="archiveModalLabel{{ project.pk }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="archiveModalLabel{{ project.pk }}">Подтверждение архивации</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Вы уверены, что хотите архивировать проект <strong>"{{ project.title }}"</strong>?
+                            <br><br>
+                            Проект будет убран из общего списка, но останется доступным в вашем личном кабинете.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                            <form method="post" action="{% url 'projects:project-archive' pk=project.pk %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger">Архивировать</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
         {% endfor %}
     </div>
 {% else %}

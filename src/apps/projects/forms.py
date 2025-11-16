@@ -31,14 +31,20 @@ class ProjectForm(forms.ModelForm):
                 'class': 'form-control',
                 'min': 1
             }),
-            'application_deadline': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
-            'end_date': forms.DateInput(attrs={
-                'class': 'form-control',
-                'type': 'date'
-            }),
+            'application_deadline': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date'
+                }
+            ),
+            'end_date': forms.DateInput(
+                format='%Y-%m-%d',
+                attrs={
+                    'class': 'form-control',
+                    'type': 'date'
+                }
+            ),
             'tags': forms.CheckboxSelectMultiple(),
             'milestones': forms.Textarea(attrs={
                 'class': 'form-control',
