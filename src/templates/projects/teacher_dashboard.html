@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Мои проекты{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Мои проекты</h1>
+    <a href="{% url 'projects:project-create' %}" class="btn btn-primary">Создать новый проект</a>
+</div>
+
+{% if project_list %}
+    <div class="row row-cols-1 g-4">
+        {% for project in project_list %}
+            <div class="col">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 class="card-title">
+                                    <a href="{{ project.get_absolute_url }}">{{ project.title }}</a>
+                                </h5>
+                                <p class="card-text">{{ project.description|truncatewords:30 }}</p>
+                                <div class="mb-2">
+                                    {% for tag in project.tags.all %}
+                                        <span class="badge bg-secondary">{{ tag.name }}</span>
+                                    {% endfor %}
+                                </div>
+                                <div class="text-muted small">
+                                    <span class="badge bg-info text-dark">{{ project.get_status_display }}</span>
+                                    <span class="ms-2">Участников: {{ project.participants.count }}/{{ project.max_participants }}</span>
+                                    <span class="ms-2">Дедлайн заявок: {{ project.application_deadline|date:"d.m.Y" }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4 d-flex flex-column justify-content-center align-items-end">
+                                {% if project.pending_count > 0 %}
+                                    <div class="alert alert-warning mb-2 w-100 text-center" role="alert">
+                                        <strong>Новых заявок: {{ project.pending_count }}</strong>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted mb-2 w-100 text-center">
+                                        Нет новых заявок
+                                    </div>
+                                {% endif %}
+                                <div class="btn-group-vertical w-100" role="group">
+                                    <a href="{% url 'projects:manage-applications' pk=project.pk %}" class="btn btn-primary btn-sm">
+                                        Управление заявками
+                                    </a>
+                                    <a href="{% url 'projects:project-update' pk=project.pk %}" class="btn btn-secondary btn-sm">
+                                        Редактировать
+                                    </a>
+                                    {% if project.status != 'ARCHIVED' %}
+                                        <button class="btn btn-outline-danger btn-sm" disabled>
+                                            Архивировать
+                                        </button>
+                                    {% else %}
+                                        <span class="btn btn-outline-secondary btn-sm disabled">
+                                            В архиве
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info" role="alert">
+        Вы еще не создали ни одного проекта. 
+        <a href="{% url 'projects:project-create' %}" class="alert-link">Создать первый проект</a>
+    </div>
+{% endif %}
+
+{% if is_paginated %}
+    <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center mt-4">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page=1">Первая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Первая</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Предыдущая</span>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Следующая</span>
+                </li>
+                <li class="page-item disabled">
+                    <span class="page-link">Последняя</span>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+{% endblock %}
+

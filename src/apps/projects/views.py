@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
@@ -22,6 +23,40 @@ class ProjectListView(ListView):
         """
         queryset = super().get_queryset()
         return queryset.exclude(status=Project.Status.ARCHIVED).select_related('creator').prefetch_related('tags')
+
+
+class TeacherDashboardView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    Личный кабинет преподавателя - список созданных им проектов.
+    Доступно только для пользователей с ролью 'Преподаватель'.
+    """
+    model = Project
+    template_name = 'projects/teacher_dashboard.html'
+    context_object_name = 'project_list'
+    paginate_by = 10
+    
+    def test_func(self):
+        """Проверяет, является ли пользователь преподавателем."""
+        return self.request.user.is_teacher
+    
+    def get_queryset(self):
+        """
+        Возвращает проекты, созданные текущим преподавателем.
+        Аннотирует количество необработанных заявок для каждого проекта.
+        """
+        queryset = super().get_queryset()
+        return queryset.filter(
+            creator=self.request.user
+        ).select_related(
+            'creator'
+        ).prefetch_related(
+            'tags', 'participants'
+        ).annotate(
+            pending_count=Count(
+                'applications',
+                filter=Q(applications__status=Application.Status.PENDING)
+            )
+        ).order_by('-created_at')
 
 
 class ProjectDetailView(DetailView):

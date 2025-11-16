@@ -735,3 +735,144 @@ class RejectApplicationViewTests(TestCase):
         
         self.assertNotIn(self.student, self.project.participants.all())
 
+
+class TeacherDashboardViewTests(TestCase):
+    """Интеграционные тесты для личного кабинета преподавателя."""
+    
+    def setUp(self):
+        self.client = Client()
+        self.teacher = User.objects.create_user(
+            username='teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.other_teacher = User.objects.create_user(
+            username='other_teacher',
+            password='testpass123',
+            role=User.Role.TEACHER
+        )
+        self.student = User.objects.create_user(
+            username='student',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        self.url = reverse('projects:teacher-dashboard')
+    
+    def test_anonymous_user_redirected_to_login(self):
+        """Анонимный пользователь перенаправляется на логин."""
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn('/users/login/', response.url)
+    
+    def test_student_cannot_access_dashboard(self):
+        """Студент не может получить доступ к личному кабинету преподавателя."""
+        self.client.login(username='student', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 403)
+    
+    def test_teacher_can_access_dashboard(self):
+        """Преподаватель может открыть свой личный кабинет."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'projects/teacher_dashboard.html')
+    
+    def test_displays_only_teacher_own_projects(self):
+        """Личный кабинет показывает только проекты текущего преподавателя."""
+        own_project = Project.objects.create(
+            title='Own Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        other_project = Project.objects.create(
+            title='Other Project',
+            description='Desc',
+            creator=self.other_teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertIn(own_project, response.context['project_list'])
+        self.assertNotIn(other_project, response.context['project_list'])
+    
+    def test_annotates_pending_applications_count(self):
+        """Проекты аннотированы количеством необработанных заявок."""
+        project = Project.objects.create(
+            title='Test Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        student1 = User.objects.create_user(
+            username='student1',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        student2 = User.objects.create_user(
+            username='student2',
+            password='testpass123',
+            role=User.Role.STUDENT
+        )
+        
+        # Создаем заявки с разными статусами
+        Application.objects.create(
+            project=project,
+            student=student1,
+            status=Application.Status.PENDING
+        )
+        Application.objects.create(
+            project=project,
+            student=student2,
+            status=Application.Status.APPROVED
+        )
+        Application.objects.create(
+            project=project,
+            student=self.student,
+            status=Application.Status.PENDING
+        )
+        
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        
+        project_in_list = response.context['project_list'][0]
+        # Должно быть только 2 PENDING заявки
+        self.assertEqual(project_in_list.pending_count, 2)
+    
+    def test_empty_dashboard_when_no_projects(self):
+        """Личный кабинет показывает сообщение, когда нет проектов."""
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.context['project_list']), 0)
+    
+    def test_projects_ordered_by_creation_date(self):
+        """Проекты сортируются по дате создания (новые первыми)."""
+        project1 = Project.objects.create(
+            title='First Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        project2 = Project.objects.create(
+            title='Second Project',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        
+        self.client.login(username='teacher', password='testpass123')
+        response = self.client.get(self.url)
+        
+        project_list = list(response.context['project_list'])
+        self.assertEqual(project_list[0], project2)
+        self.assertEqual(project_list[1], project1)
+

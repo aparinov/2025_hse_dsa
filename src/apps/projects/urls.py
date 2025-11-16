@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (
     ProjectListView, ProjectDetailView, ProjectCreateView, ProjectUpdateView,
     ApplicationCreateView, ManageApplicationsView,
-    ApproveApplicationView, RejectApplicationView
+    ApproveApplicationView, RejectApplicationView, TeacherDashboardView
 )
 
 app_name = 'projects'
@@ -10,6 +10,9 @@ app_name = 'projects'
 urlpatterns = [
     # Список проектов
     path('', ProjectListView.as_view(), name='project-list'),
+    
+    # Личный кабинет преподавателя
+    path('my-projects/', TeacherDashboardView.as_view(), name='teacher-dashboard'),
     
     # Создание проекта
     path('create/', ProjectCreateView.as_view(), name='project-create'),
