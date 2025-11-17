@@ -66,3 +66,19 @@ class ProjectForm(forms.ModelForm):
         
         return cleaned_data
 
+
+class ProjectSearchForm(forms.Form):
+    """Форма поиска проектов по названию."""
+
+    q = forms.CharField(
+        label='',
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                'class': 'form-control',
+                'placeholder': 'Найти проект по названию',
+                'type': 'search',
+            }
+        ),
+    )
+

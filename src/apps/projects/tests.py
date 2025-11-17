@@ -291,6 +291,16 @@ class ProjectListViewTests(TestCase):
             role=User.Role.TEACHER
         )
     
+    def _create_project(self, title, status=Project.Status.RECRUITMENT):
+        return Project.objects.create(
+            title=title,
+            description='Desc',
+            creator=self.teacher,
+            status=status,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+    
     def test_project_list_page_renders(self):
         """Страница списка проектов корректно отображается."""
         response = self.client.get(self.url)
@@ -319,6 +329,48 @@ class ProjectListViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertIn(active_project, response.context['project_list'])
         self.assertNotIn(archived_project, response.context['project_list'])
+
+    def test_search_filters_projects_by_title(self):
+        """Поиск возвращает проекты, содержащие запрос в названии."""
+        matching = self._create_project('Рекомендательная система для науки')
+        non_matching = self._create_project('Система мониторинга качества')
+
+        response = self.client.get(self.url, {'q': 'рекомендательная'})
+
+        project_list = list(response.context['project_list'])
+        self.assertIn(matching, project_list)
+        self.assertNotIn(non_matching, project_list)
+
+    def test_search_is_case_insensitive(self):
+        """Поиск не зависит от регистра."""
+        project = self._create_project('Data Platform')
+
+        response = self.client.get(self.url, {'q': 'data platform'})
+
+        self.assertIn(project, response.context['project_list'])
+
+    def test_search_does_not_return_archived_projects(self):
+        """Даже совпадающие по названию архивные проекты не отображаются."""
+        archived = self._create_project(
+            'Архивный рекомендательный проект',
+            status=Project.Status.ARCHIVED
+        )
+        active = self._create_project('Активный рекомендательный проект')
+
+        response = self.client.get(self.url, {'q': 'рекомендательный'})
+
+        project_list = list(response.context['project_list'])
+        self.assertIn(active, project_list)
+        self.assertNotIn(archived, project_list)
+
+    def test_search_context_flags_are_set(self):
+        """Контекст содержит информацию о поисковом запросе."""
+        self._create_project('Test Project')
+
+        response = self.client.get(self.url, {'q': 'test'})
+
+        self.assertTrue(response.context['is_search_active'])
+        self.assertEqual(response.context['search_query'], 'test')
 
 
 class ProjectDetailViewTests(TestCase):
