@@ -10,6 +10,15 @@
     {% endif %}
 </div>
 
+<div class="mb-4">
+    {% include "projects/_project_search_form.html" %}
+    {% if is_search_active %}
+        <p class="text-muted small mb-0 mt-2">
+            Результаты по запросу: "{{ search_query }}"
+        </p>
+    {% endif %}
+</div>
+
 {% if project_list %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for project in project_list %}
@@ -39,53 +48,61 @@
         {% endfor %}
     </div>
 {% else %}
-    <div class="alert alert-info" role="alert">
-        Пока нет ни одного активного проекта.
-    </div>
+    {% if is_search_active %}
+        <div class="alert alert-warning" role="alert">
+            По запросу "{{ search_query }}" ничего не найдено.
+        </div>
+    {% else %}
+        <div class="alert alert-info" role="alert">
+            Пока нет ни одного активного проекта.
+        </div>
+    {% endif %}
 {% endif %}
 
 {% if is_paginated %}
-    <nav aria-label="Навигация по страницам">
-        <ul class="pagination justify-content-center mt-4">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page=1">Первая</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Предыдущая</a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">Первая</span>
-                </li>
-                <li class="page-item disabled">
-                    <span class="page-link">Предыдущая</span>
-                </li>
-            {% endif %}
+    {% with search_query|urlencode as encoded_query %}
+        <nav aria-label="Навигация по страницам">
+            <ul class="pagination justify-content-center mt-4">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if search_query %}q={{ encoded_query }}&amp;{% endif %}page=1">Первая</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if search_query %}q={{ encoded_query }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">Предыдущая</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Первая</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Предыдущая</span>
+                    </li>
+                {% endif %}
 
-            <li class="page-item active">
-                <span class="page-link">
-                    Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
-                </span>
-            </li>
+                <li class="page-item active">
+                    <span class="page-link">
+                        Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
 
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Следующая</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Последняя</a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span class="page-link">Следующая</span>
-                </li>
-                <li class="page-item disabled">
-                    <span class="page-link">Последняя</span>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if search_query %}q={{ encoded_query }}&amp;{% endif %}page={{ page_obj.next_page_number }}">Следующая</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if search_query %}q={{ encoded_query }}&amp;{% endif %}page={{ page_obj.paginator.num_pages }}">Последняя</a>
+                    </li>
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">Следующая</span>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">Последняя</span>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endwith %}
 {% endif %}
 
 {% endblock %}

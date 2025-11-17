@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 
-from .forms import ProjectForm
+from .forms import ProjectForm, ProjectSearchForm
 from .models import Project, Application
 
 class ProjectListView(ListView):
@@ -16,13 +16,40 @@ class ProjectListView(ListView):
     template_name = 'projects/project_list.html'
     context_object_name = 'project_list'
     paginate_by = 10  # Показываем 10 проектов на странице
+    search_form_class = ProjectSearchForm
+    search_query_param = 'q'
 
     def get_queryset(self):
         """
         Исключаем из списка архивные проекты и оптимизируем запрос к БД.
         """
         queryset = super().get_queryset()
-        return queryset.exclude(status=Project.Status.ARCHIVED).select_related('creator').prefetch_related('tags')
+        queryset = queryset.exclude(status=Project.Status.ARCHIVED).select_related('creator').prefetch_related('tags')
+
+        form = self.get_search_form()
+        self.search_query = ''
+        if form.is_valid():
+            self.search_query = form.cleaned_data.get(self.search_query_param, '').strip()
+
+        if self.search_query:
+            queryset = queryset.filter(title__icontains=self.search_query)
+
+        return queryset
+
+    def get_search_form(self):
+        """
+        Возвращает форму поиска, привязанную к GET-параметрам.
+        """
+        if not hasattr(self, '_search_form'):
+            self._search_form = self.search_form_class(self.request.GET)
+        return self._search_form
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['search_form'] = self.get_search_form()
+        context['search_query'] = getattr(self, 'search_query', '')
+        context['is_search_active'] = bool(context['search_query'])
+        return context
 
 
 class TeacherDashboardView(LoginRequiredMixin, UserPassesTestMixin, ListView):
