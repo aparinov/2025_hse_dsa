@@ -1,0 +1,37 @@
+/* Делаем так, чтобы контент занимал всю высоту окна */
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Основной контент будет растягиваться, чтобы "оттолкнуть" футер вниз */
+main {
+    flex: 1 0 auto;
+}
+
+/* Футер не будет растягиваться */
+.footer {
+    flex-shrink: 0;
+}
+
+/* 
+ * Добавляем небольшой и приятный эффект при наведении на карточку проекта.
+ * Это делает интерфейс более отзывчивым на действия пользователя.
+ */
+.card-project-link {
+    text-decoration: none;
+    color: inherit; /* Наследуем цвет текста, чтобы ссылка не была синей */
+}
+
+.card-project {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.card-project:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

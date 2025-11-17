@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Управление заявками - {{ project.title }}{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>Управление заявками</h1>
+    <h3 class="text-muted">{{ project.title }}</h3>
+    <a href="{% url 'projects:project-detail' pk=project.pk %}" class="btn btn-outline-secondary">
+        &larr; Вернуться к проекту
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h4>Заявки на участие</h4>
+        <small class="text-muted">
+            Занято мест: {{ project.participants.count }}/{{ project.max_participants }}
+        </small>
+    </div>
+    <div class="card-body">
+        {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Студент</th>
+                            <th>Email</th>
+                            <th>Дата подачи</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for application in applications %}
+                        <tr>
+                            <td>
+                                <strong>{{ application.student.get_full_name|default:application.student.username }}</strong>
+                                {% if application.student.bio %}
+                                <br>
+                                <small class="text-muted">{{ application.student.bio|truncatewords:15 }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ application.student.email }}</td>
+                            <td>{{ application.created_at|date:"d.m.Y H:i" }}</td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'APPROVED' %}
+                                    <span class="badge bg-success">{{ application.get_status_display }}</span>
+                                {% elif application.status == 'REJECTED' %}
+                                    <span class="badge bg-danger">{{ application.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if application.status == 'PENDING' %}
+                                    {% if project.participants.count < project.max_participants %}
+                                        <form method="post" action="{% url 'projects:application-approve' pk=application.pk %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success" 
+                                                    onclick="return confirm('Принять заявку от {{ application.student.get_full_name|default:application.student.username }}?')">
+                                                Принять
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <button class="btn btn-sm btn-success" disabled title="Нет свободных мест">
+                                            Принять
+                                        </button>
+                                    {% endif %}
+                                    <form method="post" action="{% url 'projects:application-reject' pk=application.pk %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Отклонить заявку от {{ application.student.get_full_name|default:application.student.username }}?')">
+                                            Отклонить
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                На данный момент нет ни одной заявки на этот проект.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if project.participants.count > 0 %}
+<div class="card mt-4">
+    <div class="card-header">
+        <h4>Текущие участники</h4>
+    </div>
+    <div class="card-body">
+        <ul class="list-group">
+            {% for participant in project.participants.all %}
+                <li class="list-group-item">
+                    <strong>{{ participant.get_full_name|default:participant.username }}</strong>
+                    <br>
+                    <small class="text-muted">{{ participant.email }}</small>
+                    {% if participant.contacts %}
+                        <br>
+                        <small>Контакты: {{ participant.contacts }}</small>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
