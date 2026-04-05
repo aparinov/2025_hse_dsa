@@ -278,6 +278,91 @@ class RecommendationServiceTests(TestCase):
         self.assertEqual(result[0], project_two_tags)
         self.assertEqual(result[1], project_one_tag)
 
+    def test_uses_cover_letter_similarity(self):
+        """Рекомендует проект по текстовой близости cover letter и описания."""
+        student = User.objects.create_user(
+            username='semantic',
+            password='testpass123',
+            role=User.Role.STUDENT,
+            cover_letter='Хочу заниматься анализом данных и машинным обучением в продуктовых задачах.',
+        )
+        matching = Project.objects.create(
+            title='Data Product',
+            description='Проект про анализ данных, продуктовые метрики и машинное обучение.',
+            creator=self.teacher,
+            status=Project.Status.RECRUITMENT,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        other = Project.objects.create(
+            title='Legal Research',
+            description='Проект по исследованию правовых практик и архивных источников.',
+            creator=self.teacher,
+            status=Project.Status.RECRUITMENT,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+
+        result = list(get_recommended_projects(student))
+        self.assertEqual(result[0], matching)
+        self.assertNotIn(other, result[:1])
+
+    def test_uses_peer_applications_for_students_with_similar_tags(self):
+        """Учитывает популярные проекты среди студентов с похожими тегами."""
+        peer = User.objects.create_user(
+            username='peer',
+            password='testpass123',
+            role=User.Role.STUDENT,
+        )
+        peer.interests.add(self.tag_ml, self.tag_data)
+        popular = Project.objects.create(
+            title='Popular ML Project',
+            description='Desc',
+            creator=self.teacher,
+            status=Project.Status.RECRUITMENT,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        Application.objects.create(
+            project=popular,
+            student=peer,
+            status=Application.Status.APPROVED,
+        )
+
+        result = get_recommended_projects(self.student)
+        self.assertIn(popular, result)
+
+    def test_uses_grades_when_project_tags_match_grade_domains(self):
+        """Учитывает оценки студента по доменам, совпадающим с тегами проекта."""
+        graded_student = User.objects.create_user(
+            username='graded',
+            password='testpass123',
+            role=User.Role.STUDENT,
+            grades_json={'Machine Learning': 10, 'Web Development': 5},
+        )
+        strong_match = Project.objects.create(
+            title='ML Research',
+            description='Исследовательский проект по машинному обучению.',
+            creator=self.teacher,
+            status=Project.Status.RECRUITMENT,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        strong_match.tags.add(self.tag_ml)
+
+        weak_match = Project.objects.create(
+            title='Web Platform',
+            description='Разработка веб-платформы.',
+            creator=self.teacher,
+            status=Project.Status.RECRUITMENT,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30)
+        )
+        weak_match.tags.add(self.tag_web)
+
+        result = list(get_recommended_projects(graded_student))
+        self.assertEqual(result[0], strong_match)
+
 
 class ProjectListViewTests(TestCase):
     """Интеграционные тесты для списка проектов."""

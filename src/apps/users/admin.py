@@ -15,7 +15,23 @@ class CustomUserAdmin(UserAdmin):
         (None, {"fields": ("username", "password")}),
         (_("Personal info"), {"fields": ("first_name", "last_name", "email")}),
         # Наша новая секция для кастомных полей
-        (_("Профиль"), {"fields": ("role", "bio", "contacts", "interests")}),
+        (
+            _("Профиль"),
+            {
+                "fields": (
+                    "role",
+                    "campus",
+                    "program",
+                    "study_year",
+                    "degree_level",
+                    "bio",
+                    "cover_letter",
+                    "contacts",
+                    "interests",
+                    "grades_json",
+                )
+            },
+        ),
         (
             _("Permissions"),
             {

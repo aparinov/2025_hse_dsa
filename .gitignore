@@ -3,6 +3,12 @@ __pycache__/
 *.py[codz]
 *$py.class
 
+# Локальные датасеты для импорта/разметки
+# src/data/*.csv
+# src/data/*.jsonl
+src/data/projects_for_labeling.csv
+src/data/synthetic_recommendations.json
+
 # C extensions
 *.so
 
