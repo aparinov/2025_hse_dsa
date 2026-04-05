@@ -22,7 +22,7 @@
 
 <div class="container">
     <h2 class="pb-2 border-bottom">Рекомендованные проекты</h2>
-    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+    <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3">
         {% if recommended_projects %}
             {% for project in recommended_projects %}
                 <div class="col">
@@ -37,21 +37,21 @@
                                 Руководитель:
                                 {{ project.creator.get_full_name|default:project.creator.username }}
                             </h6>
-                            <p class="card-text mb-3">
+                            <p class="card-text flex-grow-1 mb-3">
                                 {{ project.description|truncatewords:25 }}
                             </p>
-                            <div class="mb-3">
+                            <div class="text-muted small mb-2">
+                                <span class="badge bg-info text-dark">{{ project.get_status_display }}</span>
+                                <span class="ms-2">
+                                    Мест: {{ project.participants.count }}/{{ project.max_participants }}
+                                </span>
+                            </div>
+                            <div class="mt-auto pt-1">
                                 {% for tag in project.tags.all %}
-                                    <span class="badge bg-secondary me-1 mb-1">{{ tag.name }}</span>
+                                    <a href="{% url 'projects:project-list' %}?tag={{ tag.pk }}" class="badge bg-secondary text-decoration-none me-1 mb-1">{{ tag.name }}</a>
                                 {% empty %}
                                     <span class="text-muted small">Без тегов</span>
                                 {% endfor %}
-                            </div>
-                            <div class="mt-auto text-muted small">
-                                <span class="badge bg-info text-dark">{{ project.get_status_display }}</span>
-                                <span class="ms-2">
-                                    Участников: {{ project.participants.count }}/{{ project.max_participants }}
-                                </span>
                             </div>
                         </div>
                         <div class="card-footer bg-transparent border-0">

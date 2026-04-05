@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count, Q
@@ -6,7 +8,7 @@ from django.urls import reverse_lazy
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, View
 
 from .forms import ProjectForm, ProjectSearchForm
-from .models import Project, Application
+from .models import Application, Project, Tag
 
 class ProjectListView(ListView):
     """
@@ -15,9 +17,16 @@ class ProjectListView(ListView):
     model = Project
     template_name = 'projects/project_list.html'
     context_object_name = 'project_list'
-    paginate_by = 10  # Показываем 10 проектов на странице
+    paginate_by = 12  # 4 ряда по 3 карточки на десктопе
     search_form_class = ProjectSearchForm
     search_query_param = 'q'
+
+    def setup(self, request, *args, **kwargs):
+        super().setup(request, *args, **kwargs)
+        self.active_tag = None
+        raw_tag = request.GET.get('tag')
+        if raw_tag and str(raw_tag).isdigit():
+            self.active_tag = Tag.objects.filter(pk=int(raw_tag)).first()
 
     def get_queryset(self):
         """
@@ -34,6 +43,9 @@ class ProjectListView(ListView):
         if self.search_query:
             queryset = queryset.filter(title__icontains=self.search_query)
 
+        if self.active_tag:
+            queryset = queryset.filter(tags=self.active_tag).distinct()
+
         return queryset
 
     def get_search_form(self):
@@ -49,6 +61,13 @@ class ProjectListView(ListView):
         context['search_form'] = self.get_search_form()
         context['search_query'] = getattr(self, 'search_query', '')
         context['is_search_active'] = bool(context['search_query'])
+        context['active_tag'] = self.active_tag
+        params = []
+        if context['search_query']:
+            params.append(('q', context['search_query']))
+        if self.active_tag:
+            params.append(('tag', str(self.active_tag.pk)))
+        context['filter_query'] = urlencode(params)
         return context
 
 
