@@ -1,0 +1,7 @@
+django~=4.2
+gunicorn~=21.2
+psycopg2-binary~=2.9
+python-dotenv~=1.0
+django-filter~=23.2
+pytest~=7.4
+pytest-django~=4.5

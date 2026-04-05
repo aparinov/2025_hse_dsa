@@ -1,0 +1,15 @@
+<form method="get" class="project-search-form w-100" role="search">
+    <div class="input-group">
+        {{ search_form.q }}
+        <button class="btn btn-primary" type="submit">
+            Найти
+        </button>
+        {% if is_search_active %}
+            <a href="{% url 'projects:project-list' %}" class="btn btn-outline-secondary">
+                Сбросить
+            </a>
+        {% endif %}
+    </div>
+</form>
+
+

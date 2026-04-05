@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}
+Главная - {{ block.super }}
+{% endblock %}
+
+{% block content %}
+<div class="px-4 py-5 my-5 text-center">
+    <h1 class="display-5 fw-bold text-body-emphasis">Платформа студенческих проектов</h1>
+    <div class="col-lg-6 mx-auto">
+        <p class="lead mb-4">
+            Найдите интересный проект для своего портфолио, присоединяйтесь к команде единомышленников или создайте собственный проект под руководством преподавателя.
+        </p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <a href="{% url 'projects:project-list' %}" class="btn btn-primary btn-lg px-4 gap-3">Смотреть все проекты</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'users:signup' %}" class="btn btn-outline-secondary btn-lg px-4">Зарегистрироваться</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h2 class="pb-2 border-bottom">Рекомендованные проекты</h2>
+    <div class="row g-4 py-5 row-cols-1 row-cols-lg-3">
+        {% if recommended_projects %}
+            {% for project in recommended_projects %}
+                <div class="col">
+                    <div class="card h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="{{ project.get_absolute_url }}" class="link-underline link-underline-opacity-0">
+                                    {{ project.title }}
+                                </a>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Руководитель:
+                                {{ project.creator.get_full_name|default:project.creator.username }}
+                            </h6>
+                            <p class="card-text mb-3">
+                                {{ project.description|truncatewords:25 }}
+                            </p>
+                            <div class="mb-3">
+                                {% for tag in project.tags.all %}
+                                    <span class="badge bg-secondary me-1 mb-1">{{ tag.name }}</span>
+                                {% empty %}
+                                    <span class="text-muted small">Без тегов</span>
+                                {% endfor %}
+                            </div>
+                            <div class="mt-auto text-muted small">
+                                <span class="badge bg-info text-dark">{{ project.get_status_display }}</span>
+                                <span class="ms-2">
+                                    Участников: {{ project.participants.count }}/{{ project.max_participants }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent border-0">
+                            <a href="{{ project.get_absolute_url }}" class="btn btn-sm btn-outline-primary">
+                                Подробнее
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-info mb-0" role="alert">
+                    Пока нет подходящих рекомендаций.
+                    {% if user.is_authenticated and user.is_student %}
+                        <br>
+                        <span class="small">
+                            Заполните свои научные интересы в
+                            <a href="{% url 'users:profile' %}" class="alert-link">профиле</a>,
+                            чтобы получать персональные подборки проектов.
+                        </span>
+                    {% else %}
+                        <br>
+                        <span class="small">
+                            Воспользуйтесь
+                            <a href="{% url 'projects:project-list' %}" class="alert-link">полным списком проектов</a>.
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
