@@ -27,6 +27,13 @@ class Project(models.Model):
         COMPLETED = 'COMPLETED', _('Завершен')
         ARCHIVED = 'ARCHIVED', _('В архиве')
     
+    source_project_id = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        unique=True,
+        verbose_name=_('Внешний ID проекта')
+    )
+
     title = models.CharField(max_length=250, verbose_name=_('Название проекта'))
     description = models.TextField(verbose_name=_('Описание'))
     

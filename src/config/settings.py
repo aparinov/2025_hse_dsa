@@ -129,7 +129,3 @@ LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
-# Синтетические рекомендации: JSON от generate_synthetic_recommendations.
-# Если файла нет — используется логика по тегам в services.get_recommended_projects.
-SYNTHETIC_RECOMMENDATIONS_FILE = BASE_DIR / 'data' / 'synthetic_recommendations.json'
-

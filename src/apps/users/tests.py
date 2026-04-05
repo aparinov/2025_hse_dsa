@@ -64,9 +64,15 @@ class UserProfileFormTests(TestCase):
         form = self.form_class(data={
             'first_name': 'Иван',
             'last_name': 'Иванов',
+            'campus': 'Москва',
+            'program': 'Программная инженерия',
+            'study_year': 2,
+            'degree_level': User.DegreeLevel.BACHELOR,
             'bio': 'Тестовая биография',
+            'cover_letter': 'Хочу заниматься ML-проектами.',
             'contacts': 'ivan@example.com',
-            'interests': [self.tag1.id]
+            'interests': [self.tag1.id],
+            'grades_json': '{"Machine Learning": 8}',
         })
         self.assertTrue(form.is_valid())
     
@@ -75,9 +81,15 @@ class UserProfileFormTests(TestCase):
         form = self.form_class(data={
             'first_name': '',
             'last_name': '',
+            'campus': '',
+            'program': '',
+            'study_year': '',
+            'degree_level': '',
             'bio': '',
+            'cover_letter': '',
             'contacts': '',
-            'interests': []
+            'interests': [],
+            'grades_json': '',
         })
         self.assertTrue(form.is_valid())
 
@@ -160,14 +172,22 @@ class ProfileViewTests(TestCase):
         response = self.client.post(self.url, {
             'first_name': 'Обновленное',
             'last_name': 'Имя',
+            'campus': 'Москва',
+            'program': 'Анализ данных',
+            'study_year': 1,
+            'degree_level': User.DegreeLevel.MASTER,
             'bio': 'Новая биография',
+            'cover_letter': 'Интересуют прикладные исследовательские проекты.',
             'contacts': 'new@example.com',
-            'interests': [self.tag1.id]
+            'interests': [self.tag1.id],
+            'grades_json': '{"Data Science": 9}',
         })
         
         self.user.refresh_from_db()
         self.assertEqual(self.user.first_name, 'Обновленное')
         self.assertEqual(self.user.bio, 'Новая биография')
+        self.assertEqual(self.user.program, 'Анализ данных')
+        self.assertEqual(self.user.grades_json, {'Data Science': 9})
         self.assertIn(self.tag1, self.user.interests.all())
         self.assertRedirects(response, self.url)
 
