@@ -3,7 +3,7 @@ import re
 from collections import Counter, defaultdict
 
 from django.contrib.auth import get_user_model
-from django.db.models import Case, IntegerField, Q, When
+from django.db.models import Case, Count, IntegerField, Q, When
 
 from .models import Application, Project
 
@@ -22,8 +22,10 @@ APPLICATION_STATUS_WEIGHT = {
 
 
 def _eligible_recommendation_projects(user):
-    return Project.objects.filter(status=Project.Status.RECRUITMENT).exclude(
-        Q(creator=user) | Q(participants=user)
+    return (
+        Project.objects.filter(status=Project.Status.RECRUITMENT)
+        .exclude(Q(creator=user) | Q(participants=user))
+        .annotate(participant_count=Count('participants', distinct=True))
     )
 
 
@@ -222,13 +224,26 @@ def _grades_scores(user, projects):
     return _normalize_scores(scores)
 
 
+def _participant_count(project):
+    return getattr(project, 'participant_count', project.participants.count())
+
+
+def _effective_rank_score(project, weighted_scores):
+    base = weighted_scores.get(project.pk, 0.0)
+    if _participant_count(project) >= project.max_participants:
+        return base * 0.5
+    return base
+
+
 def _rank_projects(projects, weighted_scores):
     scored_ids = [
         project.pk
         for project in sorted(
             projects,
-            key=lambda project: (weighted_scores.get(project.pk, 0.0), project.created_at),
-            reverse=True,
+            key=lambda p: (
+                -_effective_rank_score(p, weighted_scores),
+                -p.created_at.timestamp(),
+            ),
         )
         if weighted_scores.get(project.pk, 0.0) > 0
     ]

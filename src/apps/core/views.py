@@ -1,6 +1,6 @@
 """Вспомогательные представления ядра приложения."""
 
-from django.contrib.auth import get_user_model
+from django.db.models import Case, Count, F, IntegerField, Value, When
 from django.views.generic import TemplateView
 
 from apps.projects.models import Project
@@ -43,7 +43,15 @@ class HomeView(TemplateView):
             Project.objects.filter(status=Project.Status.RECRUITMENT)
             .select_related("creator")
             .prefetch_related("tags")
-            .order_by("-created_at")[: self.fallback_limit]
+            .annotate(participant_count=Count("participants", distinct=True))
+            .annotate(
+                _is_full=Case(
+                    When(participant_count__gte=F("max_participants"), then=Value(1)),
+                    default=Value(0),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("_is_full", "-created_at")[: self.fallback_limit]
         )
 
     def get_context_data(self, **kwargs):

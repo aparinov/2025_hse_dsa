@@ -457,6 +457,23 @@ class ProjectListViewTests(TestCase):
         self.assertTrue(response.context['is_search_active'])
         self.assertEqual(response.context['search_query'], 'test')
 
+    def test_tag_filter_shows_only_matching_projects(self):
+        """Фильтр ?tag=<id> показывает проекты с этим тегом."""
+        from apps.projects.models import Tag
+
+        tag_ml = Tag.objects.create(name='Machine Learning')
+        tag_web = Tag.objects.create(name='Web Development')
+        ml_project = self._create_project('ML Research')
+        ml_project.tags.add(tag_ml)
+        web_project = self._create_project('Web App')
+        web_project.tags.add(tag_web)
+
+        response = self.client.get(self.url, {'tag': str(tag_ml.pk)})
+        project_list = list(response.context['project_list'])
+        self.assertIn(ml_project, project_list)
+        self.assertNotIn(web_project, project_list)
+        self.assertEqual(response.context['active_tag'], tag_ml)
+
 
 class ProjectDetailViewTests(TestCase):
     """Интеграционные тесты для страницы проекта."""

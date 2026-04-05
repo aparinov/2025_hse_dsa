@@ -18,7 +18,7 @@
         <h4>Теги проекта</h4>
         <p>
             {% for tag in project.tags.all %}
-                <span class="badge bg-primary">{{ tag.name }}</span>
+                <a href="{% url 'projects:project-list' %}?tag={{ tag.pk }}" class="badge bg-primary text-decoration-none">{{ tag.name }}</a>
             {% empty %}
                 <span class="text-muted">Теги не указаны.</span>
             {% endfor %}
