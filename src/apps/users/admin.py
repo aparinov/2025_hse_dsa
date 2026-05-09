@@ -9,6 +9,8 @@ class CustomUserAdmin(UserAdmin):
     """
     Кастомизированное представление модели User в админ-панели.
     """
+
+    readonly_fields = (*UserAdmin.readonly_fields, 'profile_embedding')
     # Добавляем наши кастомные поля в fieldsets для отображения
     # на странице редактирования пользователя.
     fieldsets = (
@@ -29,6 +31,8 @@ class CustomUserAdmin(UserAdmin):
                     "contacts",
                     "interests",
                     "grades_json",
+                    "grade_profile",
+                    "profile_embedding",
                 )
             },
         ),

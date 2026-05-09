@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-6">
+    <div class="col-md-8">
         <div class="card">
             <div class="card-header">
                 <h2>Регистрация</h2>
@@ -12,7 +12,65 @@
             <div class="card-body">
                 <form method="post">
                     {% csrf_token %}
-                    {{ form.as_p }}
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <h5 class="mt-2">Учётная запись</h5>
+                    {% for field in form %}
+                        {% if field.name == 'username' or field.name == 'email' or field.name == 'password1' or field.name == 'password2' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                                {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <h5 class="mt-3">Профиль</h5>
+                    {% for field in form %}
+                        {% if field.name == 'first_name' or field.name == 'last_name' or field.name == 'role' or field.name == 'campus' or field.name == 'program' or field.name == 'study_year' or field.name == 'degree_level' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                    <h5 class="mt-3">Онбординг (для студентов обязательно)</h5>
+                    <p class="text-muted small">
+                        Если вы регистрируетесь как студент: опишите себя не короче 50 символов и выберите минимум 3 тега интересов — это нужно для персональных рекомендаций проектов.
+                    </p>
+                    {% for field in form %}
+                        {% if field.name == 'bio' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.name == 'cover_letter' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% for field in form %}
+                        {% if field.name == 'interests' %}
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {{ field }}
+                                {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
                     <button type="submit" class="btn btn-primary w-100">Зарегистрироваться</button>
                 </form>
             </div>

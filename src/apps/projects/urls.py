@@ -1,7 +1,7 @@
 from django.urls import path
 from .views import (
     ProjectListView, ProjectDetailView, ProjectCreateView, ProjectUpdateView,
-    ApplicationCreateView, ManageApplicationsView,
+    ApplicationCreateView, ManageApplicationsView, ProposeMatchingView,
     ApproveApplicationView, RejectApplicationView, TeacherDashboardView,
     StudentDashboardView, ArchiveProjectView, WithdrawApplicationView
 )
@@ -35,6 +35,11 @@ urlpatterns = [
     
     # Управление заявками (для преподавателя)
     path('<int:pk>/applications/', ManageApplicationsView.as_view(), name='manage-applications'),
+    path(
+        '<int:pk>/applications/propose-matching/',
+        ProposeMatchingView.as_view(),
+        name='propose-matching',
+    ),
     
     # Принятие заявки
     path('applications/<int:pk>/approve/', ApproveApplicationView.as_view(), name='application-approve'),

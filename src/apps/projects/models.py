@@ -10,6 +10,12 @@ class Tag(models.Model):
         unique=True,
         verbose_name=_('Название тега')
     )
+    embedding = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Вектор тега'),
+        help_text=_('Эмбеддинг названия тега для маппинга предметов и семантики.'),
+    )
 
     class Meta:
         verbose_name = _('Тег')
@@ -76,6 +82,13 @@ class Project(models.Model):
         blank=True,
         verbose_name=_('Контрольные точки (списком)'),
         help_text=_('Каждая точка с новой строки.')
+    )
+
+    embedding = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Вектор проекта'),
+        help_text=_('Эмбеддинг названия, описания и тегов для рекомендаций.'),
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

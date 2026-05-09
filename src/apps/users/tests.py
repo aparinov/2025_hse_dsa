@@ -96,10 +96,33 @@ class UserProfileFormTests(TestCase):
 
 class SignUpViewTests(TestCase):
     """Интеграционные тесты для регистрации пользователя."""
-    
+
     def setUp(self):
         self.client = Client()
         self.url = reverse('users:signup')
+        self.tag_a = Tag.objects.create(name='Interest Alpha')
+        self.tag_b = Tag.objects.create(name='Interest Beta')
+        self.tag_c = Tag.objects.create(name='Interest Gamma')
+
+    def _student_payload(self, username='newuser', bio=None, interests=None):
+        bio = bio or ('x' * 50)
+        interests = interests or [self.tag_a.pk, self.tag_b.pk, self.tag_c.pk]
+        return {
+            'username': username,
+            'first_name': 'Новый',
+            'last_name': 'Пользователь',
+            'email': 'new@example.com',
+            'role': User.Role.STUDENT,
+            'campus': 'Москва',
+            'program': 'ПИ',
+            'study_year': 2,
+            'degree_level': User.DegreeLevel.BACHELOR,
+            'bio': bio,
+            'cover_letter': 'Мотивационное письмо для участия в проектах университета.',
+            'interests': interests,
+            'password1': 'SecurePass123',
+            'password2': 'SecurePass123',
+        }
     
     def test_signup_page_renders_correctly(self):
         """Страница регистрации корректно отображается."""
@@ -109,21 +132,58 @@ class SignUpViewTests(TestCase):
     
     def test_signup_creates_new_user(self):
         """POST-запрос создает нового пользователя."""
-        response = self.client.post(self.url, {
-            'username': 'newuser',
-            'first_name': 'Новый',
-            'last_name': 'Пользователь',
-            'email': 'new@example.com',
-            'role': User.Role.STUDENT,
-            'password1': 'SecurePass123',
-            'password2': 'SecurePass123'
-        })
-        
+        response = self.client.post(self.url, self._student_payload())
+
         self.assertEqual(User.objects.count(), 1)
         user = User.objects.first()
         self.assertEqual(user.username, 'newuser')
         self.assertEqual(user.role, User.Role.STUDENT)
+        self.assertGreaterEqual(len(user.bio or ''), 50)
+        self.assertGreaterEqual(user.interests.count(), 3)
         self.assertRedirects(response, reverse('users:login'))
+
+    def test_teacher_signup_without_bio_and_tags(self):
+        """Преподаватель может зарегистрироваться без био и тегов."""
+        response = self.client.post(
+            self.url,
+            {
+                'username': 'teacher_new',
+                'first_name': 'Петр',
+                'last_name': 'Преподаватель',
+                'email': 'teacher_new@example.com',
+                'role': User.Role.TEACHER,
+                'campus': '',
+                'program': '',
+                'study_year': '',
+                'degree_level': '',
+                'bio': '',
+                'cover_letter': '',
+                'interests': [],
+                'password1': 'SecurePass123',
+                'password2': 'SecurePass123',
+            },
+        )
+        self.assertRedirects(response, reverse('users:login'))
+        user = User.objects.get(username='teacher_new')
+        self.assertEqual(user.role, User.Role.TEACHER)
+
+    def test_student_signup_requires_bio_length(self):
+        """Студент не регистрируется с коротким био."""
+        payload = self._student_payload(username='short_bio')
+        payload['bio'] = 'short'
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertEqual(User.objects.filter(username='short_bio').count(), 0)
+
+    def test_student_signup_requires_three_interests(self):
+        """Студент должен выбрать минимум три интереса."""
+        payload = self._student_payload(username='few_tags')
+        payload['interests'] = [self.tag_a.pk, self.tag_b.pk]
+        response = self.client.post(self.url, payload)
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context['form'].is_valid())
+        self.assertEqual(User.objects.filter(username='few_tags').count(), 0)
     
     def test_signup_with_invalid_data_shows_errors(self):
         """Регистрация с невалидными данными показывает ошибки."""

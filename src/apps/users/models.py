@@ -72,6 +72,20 @@ class User(AbstractUser):
         verbose_name=_('Оценки'),
         help_text=_('JSON-объект вида {"Machine Learning": 8, "Data Science": 7}.')
     )
+
+    grade_profile = models.JSONField(
+        blank=True,
+        default=dict,
+        verbose_name=_('Профиль оценок по тегам'),
+        help_text=_('Средние оценки по осям-тегам после маппинга предметов.'),
+    )
+
+    profile_embedding = models.JSONField(
+        null=True,
+        blank=True,
+        verbose_name=_('Вектор профиля'),
+        help_text=_('Эмбеддинг мотивационного письма, био и программы.'),
+    )
     
     interests = models.ManyToManyField(
         'projects.Tag',  # Ссылаемся на модель Tag из другого приложения строкой
@@ -79,6 +93,30 @@ class User(AbstractUser):
         verbose_name=_('Научные интересы'),
         related_name='users'
     )
+
+    def save(self, *args, **kwargs):
+        grades_changed = True
+        if self.pk:
+            previous = (
+                type(self)
+                .objects.filter(pk=self.pk)
+                .only('bio', 'cover_letter', 'program', 'grades_json')
+                .first()
+            )
+            if previous:
+                text_changed = (
+                    previous.bio != self.bio
+                    or previous.cover_letter != self.cover_letter
+                    or previous.program != self.program
+                )
+                if text_changed:
+                    self.profile_embedding = None
+                grades_changed = previous.grades_json != self.grades_json
+        super().save(*args, **kwargs)
+        if self.role == self.Role.STUDENT and grades_changed:
+            from apps.projects.grade_profile import rebuild_grade_profile
+
+            rebuild_grade_profile(self)
 
     def __str__(self):
         return self.get_full_name() or self.username

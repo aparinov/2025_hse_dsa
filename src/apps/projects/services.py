@@ -1,10 +1,10 @@
-import math
-import re
-from collections import Counter, defaultdict
+from collections import defaultdict
 
+import numpy as np
 from django.contrib.auth import get_user_model
 from django.db.models import Case, Count, IntegerField, Q, When
 
+from .embeddings import encode_text, to_list
 from .models import Application, Project
 
 User = get_user_model()
@@ -33,10 +33,6 @@ def _normalize_text(value):
     return (value or '').strip().casefold()
 
 
-def _tokenize(value):
-    return re.findall(r'\w+', _normalize_text(value), flags=re.UNICODE)
-
-
 def _project_text(project):
     tags = ' '.join(tag.name for tag in project.tags.all())
     return ' '.join(part for part in (project.title, project.description, tags) if part)
@@ -62,41 +58,6 @@ def _normalized_interest_names(user):
     }
 
 
-def _build_tfidf_vectors(texts):
-    tokenized = [_tokenize(text) for text in texts]
-    if not any(tokenized):
-        return [Counter() for _ in texts]
-
-    total_docs = len(tokenized)
-    doc_frequency = Counter()
-    for tokens in tokenized:
-        for token in set(tokens):
-            doc_frequency[token] += 1
-
-    vectors = []
-    for tokens in tokenized:
-        counts = Counter(tokens)
-        size = sum(counts.values()) or 1
-        vector = Counter()
-        for token, count in counts.items():
-            idf = math.log((1 + total_docs) / (1 + doc_frequency[token])) + 1
-            vector[token] = (count / size) * idf
-        vectors.append(vector)
-    return vectors
-
-
-def _cosine_similarity(left, right):
-    if not left or not right:
-        return 0.0
-    shared = set(left) & set(right)
-    dot = sum(left[token] * right[token] for token in shared)
-    left_norm = math.sqrt(sum(value * value for value in left.values()))
-    right_norm = math.sqrt(sum(value * value for value in right.values()))
-    if not left_norm or not right_norm:
-        return 0.0
-    return dot / (left_norm * right_norm)
-
-
 def _normalize_scores(raw_scores):
     positive_scores = [score for score in raw_scores.values() if score > 0]
     if not positive_scores:
@@ -107,6 +68,30 @@ def _normalize_scores(raw_scores):
         for key, score in raw_scores.items()
         if score > 0
     }
+
+
+def _ensure_user_embedding(user):
+    text = _user_text(user)
+    if not text.strip():
+        return None
+    stored = getattr(user, 'profile_embedding', None)
+    if stored:
+        return np.asarray(stored, dtype=np.float64)
+    vector = encode_text(text)
+    User.objects.filter(pk=user.pk).update(profile_embedding=to_list(vector))
+    return vector
+
+
+def _ensure_project_embedding(project):
+    stored = getattr(project, 'embedding', None)
+    if stored:
+        return np.asarray(stored, dtype=np.float64)
+    text = _project_text(project)
+    if not text.strip():
+        return None
+    vector = encode_text(text)
+    Project.objects.filter(pk=project.pk).update(embedding=to_list(vector))
+    return vector
 
 
 def _tag_scores(user, projects):
@@ -171,56 +156,32 @@ def _collaborative_scores(user, projects):
 
 
 def _semantic_scores(user, projects):
-    source_text = _user_text(user)
-    if not source_text:
+    user_emb = _ensure_user_embedding(user)
+    if user_emb is None:
         return {}
 
-    texts = [source_text, *(_project_text(project) for project in projects)]
-    vectors = _build_tfidf_vectors(texts)
-    user_vector = vectors[0]
-
     scores = {}
-    for project, vector in zip(projects, vectors[1:]):
-        similarity = _cosine_similarity(user_vector, vector)
+    for project in projects:
+        proj_emb = _ensure_project_embedding(project)
+        if proj_emb is None:
+            continue
+        similarity = float(np.dot(user_emb, proj_emb))
         if similarity > 0:
             scores[project.pk] = similarity
     return _normalize_scores(scores)
 
 
 def _grades_scores(user, projects):
-    grades = getattr(user, 'grades_json', {}) or {}
-    if not isinstance(grades, dict):
-        return {}
-
-    normalized_grades = {}
-    for subject, grade in grades.items():
-        if subject is None or grade in (None, ''):
-            continue
-        normalized_subject = _normalize_text(subject)
-        if not normalized_subject:
-            continue
-        normalized_grades[normalized_subject] = max(0.0, min(float(grade), 10.0)) / 10.0
-
-    if not normalized_grades:
+    profile = getattr(user, 'grade_profile', None) or {}
+    if not isinstance(profile, dict) or not profile:
         return {}
 
     scores = {}
     for project in projects:
-        project_terms = set(_tokenize(_project_text(project)))
-        if not project_terms:
-            continue
-        weighted_sum = 0.0
-        matched_weight = 0.0
-        for subject, grade in normalized_grades.items():
-            subject_terms = set(_tokenize(subject))
-            overlap = project_terms & subject_terms
-            if not overlap:
-                continue
-            weight = len(overlap) / len(subject_terms)
-            weighted_sum += grade * weight
-            matched_weight += weight
-        if matched_weight:
-            scores[project.pk] = weighted_sum / matched_weight
+        tag_names = [tag.name for tag in project.tags.all()]
+        matched = [float(profile[name]) for name in tag_names if name in profile]
+        if matched:
+            scores[project.pk] = (sum(matched) / len(matched)) / 10.0
     return _normalize_scores(scores)
 
 
@@ -264,8 +225,8 @@ def get_recommended_projects(user):
     Сигналы:
     1. Совпадение тегов пользователя и проекта.
     2. Top-pop проекты среди студентов с похожими тегами.
-    3. Текстовая близость профиля студента и описания проекта.
-    4. Сопоставление оценок студента с темами проекта.
+    3. Текстовая близость профиля студента и описания проекта (эмбеддинги).
+    4. Сопоставление оценок студента с тегами проекта (grade_profile).
     """
     if not user.is_authenticated or not getattr(user, 'is_student', False):
         return Project.objects.none()

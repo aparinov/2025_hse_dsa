@@ -340,6 +340,10 @@ class RecommendationServiceTests(TestCase):
             role=User.Role.STUDENT,
             grades_json={'Machine Learning': 10, 'Web Development': 5},
         )
+        User.objects.filter(pk=graded_student.pk).update(
+            grade_profile={'Machine Learning': 10.0, 'Web Development': 5.0}
+        )
+        graded_student.refresh_from_db()
         strong_match = Project.objects.create(
             title='ML Research',
             description='Исследовательский проект по машинному обучению.',
@@ -780,6 +784,28 @@ class ManageApplicationsViewTests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'projects/manage_applications.html')
+
+    def test_propose_matching_redirects(self):
+        """POST предложения распределения Гейла–Шепли редиректит обратно к заявкам."""
+        student2 = User.objects.create_user(
+            username='student2',
+            password='testpass123',
+            role=User.Role.STUDENT,
+        )
+        project2 = Project.objects.create(
+            title='Second',
+            description='Desc',
+            creator=self.teacher,
+            application_deadline=date.today() + timedelta(days=7),
+            end_date=date.today() + timedelta(days=30),
+        )
+        Application.objects.create(project=self.project, student=self.student)
+        Application.objects.create(project=project2, student=student2)
+
+        self.client.login(username='teacher', password='testpass123')
+        url = reverse('projects:propose-matching', kwargs={'pk': self.project.pk})
+        response = self.client.post(url)
+        self.assertRedirects(response, self.url)
 
 
 class ApproveApplicationViewTests(TestCase):
