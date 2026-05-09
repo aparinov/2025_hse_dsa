@@ -1,0 +1,1953 @@
+[
+  {
+    "index": 1,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Computer Vision",
+      "Machine Learning",
+      "NLP"
+    ]
+  },
+  {
+    "index": 2,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Recommendation Systems",
+      "NLP",
+      "Machine Learning",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 3,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Design"
+    ]
+  },
+  {
+    "index": 4,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Strategy",
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 5,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 3,
+    "tags": [
+      "Frontend",
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 6,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Legal Tech",
+      "Design",
+      "Research"
+    ]
+  },
+  {
+    "index": 7,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Machine Learning",
+      "Data Science",
+      "Recommendation Systems"
+    ]
+  },
+  {
+    "index": 8,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Frontend",
+      "Backend",
+      "Web Development"
+    ]
+  },
+  {
+    "index": 9,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Finance",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 10,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 4,
+    "tags": [
+      "Research",
+      "Design",
+      "Legal Tech",
+      "Education"
+    ]
+  },
+  {
+    "index": 11,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Design",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 12,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 13,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Strategy",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 14,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Product Management",
+      "Business Analysis",
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 15,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Computer Vision",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 16,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Recommendation Systems",
+      "Machine Learning",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 17,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Data Science",
+      "NLP",
+      "Analytics",
+      "Recommendation Systems"
+    ]
+  },
+  {
+    "index": 18,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 3,
+    "tags": [
+      "Product Management",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 19,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Frontend",
+      "Web Development",
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 20,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Legal Tech",
+      "Design",
+      "Research",
+      "Education"
+    ]
+  },
+  {
+    "index": 21,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 22,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Business Analysis",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 23,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Backend",
+      "Frontend",
+      "Web Development"
+    ]
+  },
+  {
+    "index": 24,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Economics",
+      "Finance"
+    ]
+  },
+  {
+    "index": 25,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Machine Learning",
+      "Computer Vision",
+      "Data Science",
+      "NLP"
+    ]
+  },
+  {
+    "index": 26,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Analytics",
+      "NLP"
+    ]
+  },
+  {
+    "index": 27,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Business Analysis",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 28,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Business Analysis",
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 29,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Product Management",
+      "Strategy",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 30,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Strategy",
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 31,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Strategy",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 32,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Legal Tech",
+      "Design"
+    ]
+  },
+  {
+    "index": 33,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 34,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Recommendation Systems",
+      "NLP"
+    ]
+  },
+  {
+    "index": 35,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Economics",
+      "Finance"
+    ]
+  },
+  {
+    "index": 36,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Legal Tech",
+      "Design",
+      "Research",
+      "Education"
+    ]
+  },
+  {
+    "index": 37,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Legal Tech",
+      "Design"
+    ]
+  },
+  {
+    "index": 38,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Education"
+    ]
+  },
+  {
+    "index": 39,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Legal Tech",
+      "Research"
+    ]
+  },
+  {
+    "index": 40,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 3,
+    "tags": [
+      "Web Development",
+      "Frontend",
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 41,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 42,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Design",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 43,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Analytics",
+      "Finance"
+    ]
+  },
+  {
+    "index": 44,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Analytics",
+      "Business Analysis",
+      "Finance"
+    ]
+  },
+  {
+    "index": 45,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 3,
+    "tags": [
+      "Business Analysis",
+      "Finance",
+      "Analytics",
+      "Economics"
+    ]
+  },
+  {
+    "index": 46,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 47,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Finance",
+      "Economics"
+    ]
+  },
+  {
+    "index": 48,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Marketing",
+      "Product Management",
+      "Strategy",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 49,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Research",
+      "Education",
+      "Legal Tech",
+      "Design"
+    ]
+  },
+  {
+    "index": 50,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 3,
+    "tags": [
+      "Business Analysis",
+      "Finance"
+    ]
+  },
+  {
+    "index": 51,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Marketing",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 52,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Analytics",
+      "Economics"
+    ]
+  },
+  {
+    "index": 53,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Computer Vision",
+      "Data Science",
+      "Recommendation Systems"
+    ]
+  },
+  {
+    "index": 54,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 55,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Finance",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 56,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Web Development",
+      "Frontend",
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 57,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Legal Tech",
+      "Research",
+      "Education",
+      "Design"
+    ]
+  },
+  {
+    "index": 58,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 3,
+    "tags": [
+      "Research",
+      "Education",
+      "Design",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 59,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Economics",
+      "Finance",
+      "Business Analysis",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 60,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 4,
+    "tags": [
+      "Strategy",
+      "Product Management",
+      "Marketing",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 61,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Design",
+      "Research",
+      "Legal Tech",
+      "Education"
+    ]
+  },
+  {
+    "index": 62,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Design",
+      "Research",
+      "Education",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 63,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Strategy",
+      "Marketing",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 64,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Web Development",
+      "Frontend",
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 65,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Marketing",
+      "Business Analysis",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 66,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 67,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Business Analysis",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 68,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Legal Tech",
+      "Research"
+    ]
+  },
+  {
+    "index": 69,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Design",
+      "Research",
+      "Education",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 70,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Finance",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 71,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Strategy",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 72,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Research",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 73,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 4,
+    "tags": [
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 74,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Recommendation Systems",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 75,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Marketing",
+      "Business Analysis",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 76,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Education",
+      "Legal Tech",
+      "Design"
+    ]
+  },
+  {
+    "index": 77,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Product Management",
+      "Strategy",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 78,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Education",
+      "Design"
+    ]
+  },
+  {
+    "index": 79,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 3,
+    "tags": [
+      "Product Management",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 80,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Analytics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 81,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Marketing",
+      "Business Analysis",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 82,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Frontend",
+      "Web Development",
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 83,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Research",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 84,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Web Development",
+      "DevOps",
+      "Frontend"
+    ]
+  },
+  {
+    "index": 85,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Economics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 86,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "DevOps",
+      "Frontend"
+    ]
+  },
+  {
+    "index": 87,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "NLP",
+      "Analytics",
+      "Recommendation Systems",
+      "Machine Learning"
+    ]
+  },
+  {
+    "index": 88,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Analytics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 89,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 4,
+    "tags": [
+      "Business Analysis",
+      "Product Management",
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 90,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Strategy",
+      "Business Analysis",
+      "Marketing",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 91,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Product Management",
+      "Business Analysis",
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 92,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Web Development",
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 93,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Computer Vision",
+      "NLP",
+      "Data Science",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 94,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Backend",
+      "Web Development",
+      "DevOps",
+      "Frontend"
+    ]
+  },
+  {
+    "index": 95,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "DevOps",
+      "Backend",
+      "Web Development"
+    ]
+  },
+  {
+    "index": 96,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Design",
+      "Education",
+      "Research"
+    ]
+  },
+  {
+    "index": 97,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 98,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 3,
+    "tags": [
+      "Backend",
+      "DevOps",
+      "Web Development",
+      "Frontend"
+    ]
+  },
+  {
+    "index": 99,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Finance",
+      "Economics"
+    ]
+  },
+  {
+    "index": 100,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Machine Learning",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 101,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Machine Learning",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 102,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 103,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Marketing",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 104,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Economics"
+    ]
+  },
+  {
+    "index": 105,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Design",
+      "Education",
+      "Legal Tech"
+    ]
+  },
+  {
+    "index": 106,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Marketing",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 107,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Computer Vision",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 108,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Recommendation Systems",
+      "Machine Learning",
+      "Data Science"
+    ]
+  },
+  {
+    "index": 109,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Finance",
+      "Analytics",
+      "Business Analysis",
+      "Economics"
+    ]
+  },
+  {
+    "index": 110,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Education",
+      "Legal Tech",
+      "Design"
+    ]
+  },
+  {
+    "index": 111,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Frontend",
+      "Backend"
+    ]
+  },
+  {
+    "index": 112,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Data Science",
+      "Analytics",
+      "Recommendation Systems"
+    ]
+  },
+  {
+    "index": 113,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "NLP",
+      "Recommendation Systems",
+      "Analytics",
+      "Machine Learning"
+    ]
+  },
+  {
+    "index": 114,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Frontend",
+      "Web Development",
+      "DevOps",
+      "Backend"
+    ]
+  },
+  {
+    "index": 115,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 116,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Product Management",
+      "Business Analysis",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 117,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Business Analysis",
+      "Finance"
+    ]
+  },
+  {
+    "index": 118,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Data Science",
+      "NLP"
+    ]
+  },
+  {
+    "index": 119,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 120,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Analytics",
+      "Machine Learning"
+    ]
+  },
+  {
+    "index": 121,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 122,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Finance",
+      "Business Analysis",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 123,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Computer Vision",
+      "Recommendation Systems",
+      "Analytics",
+      "Machine Learning"
+    ]
+  },
+  {
+    "index": 124,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Product Management",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 125,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Legal Tech",
+      "Education",
+      "Design"
+    ]
+  },
+  {
+    "index": 126,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 4,
+    "tags": [
+      "Finance",
+      "Analytics",
+      "Business Analysis",
+      "Economics"
+    ]
+  },
+  {
+    "index": 127,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Analytics",
+      "Business Analysis",
+      "Finance",
+      "Economics"
+    ]
+  },
+  {
+    "index": 128,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Product Management",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 129,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Product Management",
+      "Marketing",
+      "Strategy"
+    ]
+  },
+  {
+    "index": 130,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Product Management",
+      "Marketing"
+    ]
+  },
+  {
+    "index": 131,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 132,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 1,
+    "tags": [
+      "Analytics",
+      "Business Analysis",
+      "Finance",
+      "Economics"
+    ]
+  },
+  {
+    "index": 133,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Economics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 134,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Web Development",
+      "Frontend",
+      "Backend",
+      "DevOps"
+    ]
+  },
+  {
+    "index": 135,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Economics",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 136,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Backend",
+      "Web Development"
+    ]
+  },
+  {
+    "index": 137,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Research",
+      "Education"
+    ]
+  },
+  {
+    "index": 138,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Economics",
+      "Business Analysis",
+      "Finance",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 139,
+    "program": "Бизнес-информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 3,
+    "tags": [
+      "Education",
+      "Design",
+      "Research"
+    ]
+  },
+  {
+    "index": 140,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 3,
+    "tags": [
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 141,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Finance",
+      "Economics",
+      "Business Analysis",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 142,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 1,
+    "tags": [
+      "Business Analysis",
+      "Strategy",
+      "Product Management"
+    ]
+  },
+  {
+    "index": 143,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Business Analysis",
+      "Finance",
+      "Economics",
+      "Analytics"
+    ]
+  },
+  {
+    "index": 144,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 4,
+    "tags": [
+      "Research",
+      "Legal Tech",
+      "Education"
+    ]
+  },
+  {
+    "index": 145,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Нижний Новгород",
+    "study_year": 3,
+    "tags": [
+      "Web Development",
+      "Backend"
+    ]
+  },
+  {
+    "index": 146,
+    "program": "Программная инженерия",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Москва",
+    "study_year": 4,
+    "tags": [
+      "Finance",
+      "Analytics",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 147,
+    "program": "Прикладная математика и информатика",
+    "degree_level": "BACHELOR",
+    "degree_label": "бакалавриат",
+    "campus": "Санкт-Петербург",
+    "study_year": 1,
+    "tags": [
+      "Backend",
+      "Web Development"
+    ]
+  },
+  {
+    "index": 148,
+    "program": "Анализ данных в экономике",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Санкт-Петербург",
+    "study_year": 2,
+    "tags": [
+      "Machine Learning",
+      "NLP",
+      "Recommendation Systems"
+    ]
+  },
+  {
+    "index": 149,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Москва",
+    "study_year": 2,
+    "tags": [
+      "Strategy",
+      "Marketing",
+      "Product Management",
+      "Business Analysis"
+    ]
+  },
+  {
+    "index": 150,
+    "program": "Системная и программная инженерия",
+    "degree_level": "MASTER",
+    "degree_label": "магистратура",
+    "campus": "Нижний Новгород",
+    "study_year": 2,
+    "tags": [
+      "Frontend",
+      "Web Development",
+      "DevOps",
+      "Backend"
+    ]
+  }
+]

@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
+from apps.projects.management.commands.compute_embeddings import run_compute_embeddings
 from apps.projects.models import Project, Tag
 
 User = get_user_model()
@@ -109,3 +110,4 @@ class Command(BaseCommand):
                 f'{created_teachers} преподавателей создано, {created_tags} новых тегов.'
             )
         )
+        run_compute_embeddings(stdout=self.stdout)

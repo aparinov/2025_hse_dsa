@@ -1,6 +1,7 @@
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
@@ -9,6 +10,9 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, V
 
 from .forms import ProjectForm, ProjectSearchForm
 from .models import Application, Project, Tag
+from .services_matching import propose_matching_for_teacher
+
+UserModel = get_user_model()
 
 class ProjectListView(ListView):
     """
@@ -266,6 +270,38 @@ class ApplicationCreateView(LoginRequiredMixin, UserPassesTestMixin, View):
         messages.success(request, 'Ваша заявка успешно отправлена!')
         
         return redirect('projects:project-detail', pk=project_pk)
+
+
+class ProposeMatchingView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """
+    Запускает алгоритм Гейла–Шепли по всем открытым проектам преподавателя
+    и показывает предлагаемое распределение по текущим заявкам PENDING.
+    """
+
+    def test_func(self):
+        project = get_object_or_404(Project, pk=self.kwargs.get('pk'))
+        return self.request.user == project.creator
+
+    def post(self, request, pk):
+        project = get_object_or_404(Project, pk=pk)
+        result = propose_matching_for_teacher(project.creator)
+        if not result:
+            messages.info(request, 'Нет заявок в статусе «На рассмотрении» для распределения.')
+            return redirect('projects:manage-applications', pk=pk)
+        lines = []
+        for pid, sids in sorted(result.items()):
+            title = Project.objects.filter(pk=pid).values_list('title', flat=True).first()
+            names = []
+            for sid in sids:
+                u = UserModel.objects.filter(pk=sid).first()
+                label = u.get_full_name() or u.username if u else str(sid)
+                names.append(label)
+            lines.append(f'{title}: {", ".join(names)}')
+        messages.success(
+            request,
+            'Предложение стабильного распределения (Гейл–Шепли): ' + ' | '.join(lines),
+        )
+        return redirect('projects:manage-applications', pk=pk)
 
 
 class ManageApplicationsView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
