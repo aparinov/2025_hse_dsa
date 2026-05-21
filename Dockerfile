@@ -11,6 +11,7 @@ WORKDIR /app
 # Установка зависимостей
 COPY requirements.txt /app/
 RUN pip install --upgrade pip && \
+    pip install --index-url https://download.pytorch.org/whl/cpu torch==2.2.2+cpu && \
     pip install -r requirements.txt
 
 # Создаем пользователя без прав root для безопасности
@@ -19,7 +20,7 @@ RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 # Копируем исходный код
 COPY ./src /app/src
 COPY ./.docker/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/\r$//' /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Меняем владельца файлов на нашего пользователя
 RUN chown -R appuser:appgroup /app
