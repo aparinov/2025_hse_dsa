@@ -1,0 +1,6 @@
+scenario_id,scenario_name,hit_rate_at_5,ndcg_at_5,assigned_pct,capacity_utilization_pct,blocking_pairs
+base,Base,0.0133,0.0055,84.67,42.05,145
+recsys_only,RecSys-only,0.0267,0.0152,88.0,43.71,178
+recsys_prof_rank,RecSys + Prof. Rank,0.0267,0.0152,92.0,45.7,105
+hybrid,Hybrid,0.0267,0.0168,89.33,44.37,172
+stable_matching,Stable Matching,0.0267,0.0152,89.33,44.37,0

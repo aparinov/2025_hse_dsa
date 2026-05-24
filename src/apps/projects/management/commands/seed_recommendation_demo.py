@@ -2,6 +2,7 @@ import random
 import re
 from pathlib import Path
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
@@ -67,10 +68,11 @@ class Command(BaseCommand):
         parser.add_argument('--students', type=int, default=150)
         parser.add_argument('--seed', type=int, default=42)
         parser.add_argument('--max-applications', type=int, default=3)
+        default_profiles = settings.BASE_DIR / 'data' / 'synthetic_student_profiles.json'
         parser.add_argument(
             '--profiles-json',
             type=str,
-            default='',
+            default=str(default_profiles) if default_profiles.is_file() else '',
             help='Путь к JSON-массиву от LLM: [{"index": 1, "bio": "...", "cover_letter": "..."}, ...]',
         )
 

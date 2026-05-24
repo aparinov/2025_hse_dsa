@@ -129,3 +129,28 @@ LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 
+# Явный маппинг "тег проекта -> релевантные предметы" для интерпретируемого
+# преподавательского скоринга и описания эксперимента в статье.
+PROJECT_TAG_SUBJECTS = {
+    'Analytics': ['Statistics', 'Probability Theory', 'Data Analysis', 'Business Analytics'],
+    'Backend': ['Python', 'Databases', 'Software Engineering', 'Web Development'],
+    'Business Analysis': ['Business Analytics', 'Systems Analysis', 'Product Management'],
+    'Computer Vision': ['Machine Learning', 'Deep Learning', 'Computer Vision'],
+    'Data Science': ['Machine Learning', 'Statistics', 'Data Analysis', 'Python'],
+    'Design': ['UX Research', 'Product Design', 'Human-Computer Interaction'],
+    'DevOps': ['Operating Systems', 'Computer Networks', 'Cloud Computing'],
+    'Economics': ['Econometrics', 'Microeconomics', 'Macroeconomics', 'Statistics'],
+    'Education': ['Educational Technologies', 'Research Methods', 'Data Analysis'],
+    'Finance': ['Finance', 'Econometrics', 'Statistics', 'Risk Management'],
+    'Frontend': ['Web Development', 'JavaScript', 'Human-Computer Interaction'],
+    'Legal Tech': ['Legal Tech', 'Information Systems', 'Data Analysis'],
+    'Machine Learning': ['Machine Learning', 'Deep Learning', 'Statistics', 'Python'],
+    'Marketing': ['Marketing Analytics', 'Statistics', 'Business Analytics'],
+    'NLP': ['Natural Language Processing', 'Machine Learning', 'Deep Learning'],
+    'Product Management': ['Product Management', 'Business Analytics', 'UX Research'],
+    'Recommendation Systems': ['Recommendation Systems', 'Machine Learning', 'Data Analysis'],
+    'Research': ['Research Methods', 'Statistics', 'Data Analysis'],
+    'Strategy': ['Strategic Management', 'Business Analytics', 'Economics'],
+    'Web Development': ['Web Development', 'Python', 'Databases', 'JavaScript'],
+}
+
