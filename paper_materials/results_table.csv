@@ -1,6 +1,6 @@
-scenario_id,scenario_name,hit_rate_at_5,ndcg_at_5,assigned_pct,capacity_utilization_pct,blocking_pairs
-base,Base,0.0133,0.0055,84.67,42.05,145
-recsys_only,RecSys-only,0.0267,0.0152,88.0,43.71,178
-recsys_prof_rank,RecSys + Prof. Rank,0.0267,0.0152,92.0,45.7,105
-hybrid,Hybrid,0.0267,0.0168,89.33,44.37,172
-stable_matching,Stable Matching,0.0267,0.0152,89.33,44.37,0
+scenario_id,scenario_name,hit_rate_at_1,ndcg_at_1,hit_rate_at_5,ndcg_at_5,hit_rate_at_10,ndcg_at_10,hit_rate_at_20,ndcg_at_20,assigned_pct,unassigned_students,capacity_utilization_pct,filled_projects_pct,mean_student_rank_assigned,mrr_assigned,blocking_pairs
+base,Base,0.0133,0.0133,0.0533,0.0322,0.0867,0.0431,0.1867,0.0682,88.67,17,44.04,27.0,9.68,0.176,147
+recsys_only,RecSys-only,0.4533,0.4533,0.8133,0.6417,0.94,0.6833,0.9733,0.692,88.0,18,43.71,33.0,2.19,0.6492,178
+recsys_prof_rank,RecSys + Prof. Rank,0.3267,0.3267,0.8867,0.6474,0.9667,0.6743,0.9733,0.6762,92.0,12,45.7,37.0,2.91,0.4827,105
+hybrid,Hybrid,0.2667,0.2667,0.8133,0.5723,0.94,0.6139,0.9733,0.6226,92.0,12,45.7,37.0,2.34,0.6115,67
+stable_matching,Stable Matching,0.3067,0.3067,0.8133,0.5872,0.94,0.6289,0.9733,0.6375,89.33,16,44.37,35.0,2.28,0.6317,0

@@ -45,16 +45,28 @@ SCENARIOS = (
     ('stable_matching', 'Stable Matching'),
 )
 
+SCENARIO_COLORS = {
+    'base': '#4C72B0',
+    'recsys_only': '#DD8452',
+    'recsys_prof_rank': '#55A868',
+    'hybrid': '#C44E52',
+    'stable_matching': '#8172B2',
+}
+
 
 @dataclass(frozen=True)
 class ExperimentConfig:
     students_limit: int = 150
     projects_limit: int = 100
-    top_k: int = 5
+    top_k: int = 20
+    application_k: int = 5
+    metrics_k: tuple[int, ...] = (1, 5, 10, 20)
     seed: int = 42
     top_project_share: float = 0.20
     top_demand_share: float = 0.80
-    hybrid_recsys_weight: float = 0.65
+    oracle_tag_weight: float = 0.40
+    oracle_semantic_weight: float = 0.45
+    oracle_gpa_weight: float = 0.15
 
 
 def _student_profile_text(student: User) -> str:
@@ -215,7 +227,7 @@ def _gpa_relevance(student: User, project: Project) -> float:
     return (sum(matched) / len(matched) / 10.0) if matched else 0.0
 
 
-def build_score_matrices(students: list[User], projects: list[Project]) -> tuple[np.ndarray, np.ndarray]:
+def build_score_matrices(students: list[User], projects: list[Project]) -> tuple[np.ndarray, np.ndarray, dict[str, np.ndarray]]:
     student_texts = [
         ' '.join(part for part in (student.cover_letter, student.bio, student.program) if part)
         for student in students
@@ -232,6 +244,13 @@ def build_score_matrices(students: list[User], projects: list[Project]) -> tuple
 
     rec_scores = np.zeros((len(students), len(projects)), dtype=float)
     prof_scores = np.zeros((len(students), len(projects)), dtype=float)
+    components = {
+        'tags_overlap': np.zeros((len(students), len(projects)), dtype=float),
+        'gpa_rel': np.zeros((len(students), len(projects)), dtype=float),
+        'recsys_semantic': np.zeros((len(students), len(projects)), dtype=float),
+        'teacher_semantic': np.zeros((len(students), len(projects)), dtype=float),
+        'popularity_prior': np.zeros((len(students), len(projects)), dtype=float),
+    }
     popularity = np.linspace(1.0, 0.2, len(projects))
 
     for student_index, student in enumerate(students):
@@ -250,14 +269,65 @@ def build_score_matrices(students: list[User], projects: list[Project]) -> tuple
 
             tags = _tag_overlap(student, project)
             grades = _gpa_relevance(student, project)
-            rec_scores[student_index, project_index] = 0.45 * tags + 0.25 * popularity[project_index] + 0.20 * max(semantic, 0) + 0.10 * grades
-            prof_scores[student_index, project_index] = 0.40 * grades + 0.40 * max(teacher_semantic, 0) + 0.20 * tags
-    return rec_scores, prof_scores
+            rec_semantic = max(semantic, 0)
+            prof_semantic = max(teacher_semantic, 0)
+            components['tags_overlap'][student_index, project_index] = tags
+            components['gpa_rel'][student_index, project_index] = grades
+            components['recsys_semantic'][student_index, project_index] = rec_semantic
+            components['teacher_semantic'][student_index, project_index] = prof_semantic
+            components['popularity_prior'][student_index, project_index] = popularity[project_index]
+            rec_scores[student_index, project_index] = 0.45 * tags + 0.25 * popularity[project_index] + 0.20 * rec_semantic + 0.10 * grades
+            prof_scores[student_index, project_index] = 0.40 * grades + 0.40 * prof_semantic + 0.20 * tags
+    return rec_scores, prof_scores, components
 
 
-def infer_ground_truth(students: list[User], projects: list[Project], rec_scores: np.ndarray, prof_scores: np.ndarray) -> dict[int, int]:
-    total = 0.70 * rec_scores + 0.30 * prof_scores
-    return {student.pk: projects[int(np.argmax(total[index]))].pk for index, student in enumerate(students)}
+def infer_ground_truth(
+    students: list[User],
+    projects: list[Project],
+    components: dict[str, np.ndarray],
+    config: ExperimentConfig,
+) -> dict[int, int]:
+    """
+    Контролируемый hidden relevance: без popularity и без capacity.
+    Это ближе к "идеальному проекту" студента, чем к текущей RecSys-формуле.
+    """
+    oracle_scores = (
+        config.oracle_tag_weight * components['tags_overlap']
+        + config.oracle_semantic_weight * components['recsys_semantic']
+        + config.oracle_gpa_weight * components['gpa_rel']
+    )
+    return {student.pk: projects[int(np.argmax(oracle_scores[index]))].pk for index, student in enumerate(students)}
+
+
+def _normalize_ground_truth(
+    ground_truth: Optional[dict[int, int]],
+    students: list[User],
+    projects: list[Project],
+    fallback_ground_truth: dict[int, int],
+) -> dict[int, int]:
+    if not ground_truth:
+        return fallback_ground_truth
+
+    student_ids = {student.pk for student in students}
+    cohort_to_pk = {
+        index: student.pk
+        for student in students
+        if (index := synthetic_student_index(student)) is not None
+    }
+    project_ids = {project.pk for project in projects}
+    normalized = {}
+    for raw_student_id, raw_project_id in ground_truth.items():
+        student_id = int(raw_student_id)
+        project_id = int(raw_project_id)
+        if student_id not in student_ids:
+            student_id = cohort_to_pk.get(student_id)
+        if student_id in student_ids and project_id in project_ids:
+            normalized[student_id] = project_id
+
+    return {
+        student.pk: normalized.get(student.pk, fallback_ground_truth[student.pk])
+        for student in students
+    }
 
 
 def _capacities(projects: list[Project]) -> dict[int, int]:
@@ -266,6 +336,10 @@ def _capacities(projects: list[Project]) -> dict[int, int]:
 
 def _top_indices(scores: np.ndarray, k: int) -> list[int]:
     return list(np.argsort(-scores)[:k])
+
+
+def _full_ranking(scores: np.ndarray) -> list[int]:
+    return list(np.argsort(-scores))
 
 
 def _pareto_project_order(projects: list[Project], config: ExperimentConfig) -> list[int]:
@@ -313,6 +387,52 @@ def _project_preferences(students: list[User], projects: list[Project], prof_sco
     return prefs
 
 
+def _rerank_gs_first(recsys_prefs: dict[int, list[int]], gs_assignment: dict[int, int]) -> dict[int, list[int]]:
+    reranked = {}
+    for student_id, recommendations in recsys_prefs.items():
+        assigned_project = gs_assignment.get(student_id)
+        if assigned_project:
+            reranked[student_id] = [assigned_project] + [
+                project_id for project_id in recommendations if project_id != assigned_project
+            ]
+        else:
+            reranked[student_id] = list(recommendations)
+    return reranked
+
+
+def _rerank_assignment_first(
+    base_prefs: dict[int, list[int]],
+    assignment: dict[int, int],
+) -> dict[int, list[int]]:
+    return _rerank_gs_first(base_prefs, assignment)
+
+
+def _rerank_by_professor_acceptance(
+    students: list[User],
+    projects: list[Project],
+    recsys_prefs: dict[int, list[int]],
+    rec_scores: np.ndarray,
+    prof_scores: np.ndarray,
+    recsys_weight: float = 0.65,
+    professor_weight: float = 0.35,
+) -> dict[int, list[int]]:
+    """Effective list for scenario 3: RecSys candidates, adjusted by professor-side fit."""
+    project_id_to_index = {project.pk: index for index, project in enumerate(projects)}
+    reranked = {}
+    for student_index, student in enumerate(students):
+        prefs = recsys_prefs[student.pk]
+        scored = []
+        for position, project_id in enumerate(prefs):
+            project_index = project_id_to_index[project_id]
+            score = (
+                recsys_weight * rec_scores[student_index, project_index]
+                + professor_weight * prof_scores[student_index, project_index]
+            )
+            scored.append((-score, position, project_id))
+        reranked[student.pk] = [project_id for _, _, project_id in sorted(scored)]
+    return reranked
+
+
 def _metrics(
     scenario_id: str,
     scenario_name: str,
@@ -322,27 +442,59 @@ def _metrics(
     preferences: dict[int, list[int]],
     project_prefs: dict[int, list[int]],
     ground_truth: dict[int, int],
-    k: int,
+    metrics_k: tuple[int, ...],
+    assignment_preference_source: dict[int, list[int]] | None = None,
+    stability_preferences: dict[int, list[int]] | None = None,
 ) -> dict:
-    hits = 0
-    dcg = 0.0
-    for student in students:
-        top = preferences.get(student.pk, [])[:k]
-        ideal = ground_truth.get(student.pk)
-        if ideal in top:
-            rank = top.index(ideal) + 1
-            hits += 1
-            dcg += 1 / math.log2(rank + 1)
+    assignment_preference_source = assignment_preference_source or preferences
+    stability_preferences = stability_preferences or preferences
+    row = {'scenario_id': scenario_id, 'scenario_name': scenario_name}
+    for k in metrics_k:
+        hits = 0
+        dcg = 0.0
+        for student in students:
+            top = preferences.get(student.pk, [])[:k]
+            ideal = ground_truth.get(student.pk)
+            if ideal in top:
+                rank = top.index(ideal) + 1
+                hits += 1
+                dcg += 1 / math.log2(rank + 1)
+        row[f'hit_rate_at_{k}'] = round(hits / len(students), 4)
+        row[f'ndcg_at_{k}'] = round(dcg / len(students), 4)
+
     total_capacity = sum(capacities.values())
-    return {
-        'scenario_id': scenario_id,
-        'scenario_name': scenario_name,
-        'hit_rate_at_5': round(hits / len(students), 4),
-        'ndcg_at_5': round(dcg / len(students), 4),
-        'assigned_pct': round(len(assignment) / len(students) * 100, 2),
-        'capacity_utilization_pct': round(len(assignment) / total_capacity * 100, 2) if total_capacity else 0.0,
-        'blocking_pairs': count_blocking_pairs(assignment, capacities, preferences, project_prefs, students),
-    }
+    assigned_project_counts = Counter(assignment.values())
+    assigned_ranks = []
+    reciprocal_ranks = []
+    for student in students:
+        assigned_project = assignment.get(student.pk)
+        if not assigned_project:
+            continue
+        ranking = assignment_preference_source.get(student.pk, [])
+        if assigned_project in ranking:
+            rank = ranking.index(assigned_project) + 1
+            assigned_ranks.append(rank)
+            reciprocal_ranks.append(1 / rank)
+
+    row['assigned_pct'] = round(len(assignment) / len(students) * 100, 2)
+    row['unassigned_students'] = len(students) - len(assignment)
+    row['capacity_utilization_pct'] = round(len(assignment) / total_capacity * 100, 2) if total_capacity else 0.0
+    row['filled_projects_pct'] = round(
+        sum(1 for project_id, capacity in capacities.items() if assigned_project_counts[project_id] >= capacity)
+        / len(capacities)
+        * 100,
+        2,
+    )
+    row['mean_student_rank_assigned'] = round(sum(assigned_ranks) / len(assigned_ranks), 2) if assigned_ranks else 0.0
+    row['mrr_assigned'] = round(sum(reciprocal_ranks) / len(reciprocal_ranks), 4) if reciprocal_ranks else 0.0
+    row['blocking_pairs'] = count_blocking_pairs(
+        assignment,
+        capacities,
+        stability_preferences,
+        project_prefs,
+        students,
+    )
+    return row
 
 
 def run_experiments(
@@ -350,48 +502,85 @@ def run_experiments(
     projects: list[Project],
     config: Optional[ExperimentConfig] = None,
     ground_truth: Optional[dict[int, int]] = None,
-) -> tuple[list[dict], list[dict], dict[str, Counter]]:
+) -> tuple[
+    list[dict],
+    list[dict],
+    dict[str, dict[str, Counter]],
+    dict[str, dict[int, list[int]]],
+    dict[str, dict[int, int]],
+    np.ndarray,
+    np.ndarray,
+    dict[str, np.ndarray],
+    dict[int, int],
+]:
     config = config or ExperimentConfig()
-    rec_scores, prof_scores = build_score_matrices(students, projects)
-    ground_truth = ground_truth or infer_ground_truth(students, projects, rec_scores, prof_scores)
+    rec_scores, prof_scores, components = build_score_matrices(students, projects)
+    inferred_ground_truth = infer_ground_truth(students, projects, components, config)
+    ground_truth = _normalize_ground_truth(ground_truth, students, projects, inferred_ground_truth)
     capacities = _capacities(projects)
     project_prefs = _project_preferences(students, projects, prof_scores)
     project_ids = [project.pk for project in projects]
+    project_id_to_index = {project_id: index for index, project_id in enumerate(project_ids)}
     rng = random.Random(config.seed)
 
     pareto_order = _pareto_project_order(projects, config)
     top_count = max(1, round(len(projects) * config.top_project_share))
     pareto_weights = [config.top_demand_share / top_count if idx < top_count else (1 - config.top_demand_share) / max(1, len(projects) - top_count) for idx in range(len(projects))]
+    ordered_pareto_weights = [pareto_weights[index] for index in pareto_order]
 
     scenario_preferences = {}
     scenario_preferences['base'] = {
-        student.pk: [project_ids[index] for index in _weighted_without_replacement(pareto_order, pareto_weights, config.top_k, rng)]
+        student.pk: [
+            project_ids[index]
+            for index in _weighted_without_replacement(pareto_order, ordered_pareto_weights, config.top_k, rng)
+        ]
         for student in students
     }
     scenario_preferences['recsys_only'] = {
-        student.pk: [project_ids[index] for index in _top_indices(rec_scores[row], config.top_k)]
+        student.pk: [project_ids[index] for index in _full_ranking(rec_scores[row])[: config.top_k]]
         for row, student in enumerate(students)
     }
-    scenario_preferences['recsys_prof_rank'] = scenario_preferences['recsys_only']
-    hybrid_scores = config.hybrid_recsys_weight * rec_scores + (1 - config.hybrid_recsys_weight) * prof_scores
-    scenario_preferences['hybrid'] = {
-        student.pk: [project_ids[index] for index in _top_indices(hybrid_scores[row], config.top_k)]
-        for row, student in enumerate(students)
-    }
+    scenario_preferences['recsys_prof_rank'] = _rerank_by_professor_acceptance(
+        students,
+        projects,
+        scenario_preferences['recsys_only'],
+        rec_scores,
+        prof_scores,
+    )
     scenario_preferences['stable_matching'] = scenario_preferences['recsys_only']
+    application_preferences = {
+        scenario_id: {
+            student_id: prefs[: config.application_k]
+            for student_id, prefs in preferences.items()
+        }
+        for scenario_id, preferences in scenario_preferences.items()
+    }
+    application_preferences['recsys_prof_rank'] = {
+        student_id: prefs[: config.application_k]
+        for student_id, prefs in scenario_preferences['recsys_only'].items()
+    }
 
     assignments = {
-        'base': _greedy_assign(students, projects, scenario_preferences['base'], capacities),
-        'recsys_only': _greedy_assign(students, projects, scenario_preferences['recsys_only'], capacities),
-        'hybrid': _greedy_assign(students, projects, scenario_preferences['hybrid'], capacities),
+        'base': _greedy_assign(
+            students,
+            projects,
+            application_preferences['base'],
+            capacities,
+        ),
+        'recsys_only': _greedy_assign(
+            students,
+            projects,
+            application_preferences['recsys_only'],
+            capacities,
+        ),
     }
 
     prof_rank_assignment = {}
     occupied = Counter()
     candidates = []
     for student_index, student in enumerate(students):
-        for project_id in scenario_preferences['recsys_prof_rank'][student.pk]:
-            project_index = project_ids.index(project_id)
+        for project_id in application_preferences['recsys_prof_rank'][student.pk]:
+            project_index = project_id_to_index[project_id]
             candidates.append((-prof_scores[student_index, project_index], student.pk, project_id))
     for _, student_id, project_id in sorted(candidates):
         if student_id not in prof_rank_assignment and occupied[project_id] < capacities[project_id]:
@@ -402,28 +591,82 @@ def run_experiments(
         students=students,
         projects=projects,
         capacities=capacities,
-        student_prefs=scenario_preferences['stable_matching'],
+        student_prefs=application_preferences['stable_matching'],
         project_prefs=project_prefs,
+    )
+    scenario_preferences['hybrid'] = _rerank_gs_first(
+        scenario_preferences['recsys_only'],
+        assignments['stable_matching'],
+    )
+    application_preferences['hybrid'] = {
+        student_id: prefs[: config.application_k]
+        for student_id, prefs in scenario_preferences['hybrid'].items()
+    }
+    assignments['hybrid'] = _greedy_assign(
+        students,
+        projects,
+        application_preferences['hybrid'],
+        capacities,
+    )
+    effective_preferences = dict(scenario_preferences)
+    effective_preferences['recsys_prof_rank'] = _rerank_assignment_first(
+        scenario_preferences['recsys_prof_rank'],
+        assignments['recsys_prof_rank'],
+    )
+    effective_preferences['hybrid'] = _rerank_assignment_first(
+        scenario_preferences['hybrid'],
+        assignments['hybrid'],
+    )
+    effective_preferences['stable_matching'] = _rerank_assignment_first(
+        scenario_preferences['recsys_only'],
+        assignments['stable_matching'],
     )
 
     metrics = []
     assignment_rows = []
-    demand_histograms = {}
+    histograms = {'first_choice': {}, 'assignments': {}}
     for scenario_id, scenario_name in SCENARIOS:
-        prefs = scenario_preferences[scenario_id]
+        prefs = effective_preferences[scenario_id]
+        ranking_prefs = scenario_preferences[scenario_id]
+        application_prefs = application_preferences[scenario_id]
         assignment = assignments[scenario_id]
-        metrics.append(_metrics(scenario_id, scenario_name, students, capacities, assignment, prefs, project_prefs, ground_truth, config.top_k))
-        demand_histograms[scenario_id] = Counter(project_id for values in prefs.values() for project_id in values)
+        metrics.append(
+            _metrics(
+                scenario_id,
+                scenario_name,
+                students,
+                capacities,
+                assignment,
+                prefs,
+                project_prefs,
+                ground_truth,
+                config.metrics_k,
+                scenario_preferences['recsys_only'],
+                application_prefs,
+            )
+        )
+        histograms['first_choice'][scenario_id] = Counter(
+            ranking_prefs[student.pk][0]
+            for student in students
+            if ranking_prefs.get(student.pk)
+        )
+        histograms['assignments'][scenario_id] = Counter(assignment.values())
         for student in students:
+            assigned_project_id = assignment.get(student.pk, '')
             assignment_rows.append(
                 {
                     'student_id': student.pk,
-                    'project_id': assignment.get(student.pk, ''),
-                    'assigned_status': 'assigned' if student.pk in assignment else 'unassigned',
+                    'project_id': assigned_project_id,
+                    'assigned_status': 'assigned' if assigned_project_id else 'unassigned',
                     'scenario_id': scenario_id,
+                    'assigned_rank_in_recsys': (
+                        scenario_preferences['recsys_only'][student.pk].index(assigned_project_id) + 1
+                        if assigned_project_id in scenario_preferences['recsys_only'][student.pk]
+                        else ''
+                    ),
                 }
             )
-    return metrics, assignment_rows, demand_histograms
+    return metrics, assignment_rows, histograms, scenario_preferences, assignments, rec_scores, prof_scores, components, ground_truth
 
 
 def save_csv(path: Path, rows: list[dict]) -> None:
@@ -435,20 +678,96 @@ def save_csv(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def build_demand_histogram_figure(demand_histograms: dict[str, Counter]):
+HISTOGRAM_TOP_PROJECTS = 35
+
+
+def _recsys_project_order(histograms: dict[str, dict[str, Counter]], limit: int = HISTOGRAM_TOP_PROJECTS) -> list[int]:
+    counter = histograms['first_choice']['recsys_only']
+    return [project_id for project_id, _ in counter.most_common()][:limit]
+
+
+def _plot_demand_concentration(axis, histograms: dict[str, dict[str, Counter]]) -> None:
+    project_order = _recsys_project_order(histograms)
+    x = np.arange(1, len(project_order) + 1)
+    for scenario_id, label in (
+        ('recsys_only', 'RecSys-only'),
+        ('base', 'Base (без ML)'),
+    ):
+        counter = histograms['first_choice'][scenario_id]
+        axis.plot(
+            x,
+            [counter.get(project_id, 0) for project_id in project_order],
+            label=label,
+            color=SCENARIO_COLORS[scenario_id],
+            linewidth=2,
+            marker='o',
+            markersize=3,
+        )
+    axis.set_title('RecSys стягивает студентов к одним и тем же проектам')
+    axis.set_xlabel('проекты (ранг по популярности в RecSys)')
+    axis.set_ylabel('студентов с 1-м выбором')
+    axis.legend()
+    axis.grid(axis='y', alpha=0.25)
+
+
+def _plot_assignment_comparison(axis, histograms: dict[str, dict[str, Counter]]) -> None:
+    project_order = _recsys_project_order(histograms)
+    x = np.arange(1, len(project_order) + 1)
+    recsys_demand = histograms['first_choice']['recsys_only']
+    demand = [recsys_demand.get(project_id, 0) for project_id in project_order]
+    recsys_assign = [
+        histograms['assignments']['recsys_only'].get(project_id, 0) for project_id in project_order
+    ]
+    stable_assign = [
+        histograms['assignments']['stable_matching'].get(project_id, 0) for project_id in project_order
+    ]
+    axis.plot(x, demand, label='Спрос (1-я рекомендация RecSys)', color='#DD8452', linewidth=2.5)
+    axis.plot(
+        x,
+        recsys_assign,
+        label='Назначения RecSys-only',
+        color='#DD8452',
+        linewidth=2,
+        linestyle='--',
+    )
+    axis.plot(
+        x,
+        stable_assign,
+        label='Stable Matching',
+        color=SCENARIO_COLORS['stable_matching'],
+        linewidth=2.5,
+    )
+    axis.set_title('Stable Matching сглаживает перегруз популярных проектов')
+    axis.set_xlabel('проекты (ранг по популярности в RecSys)')
+    axis.set_ylabel('студентов')
+    axis.legend()
+    axis.grid(axis='y', alpha=0.25)
+
+
+def build_demand_concentration_figure(histograms: dict[str, dict[str, Counter]]):
     import matplotlib.pyplot as plt
 
-    labels = [(scenario_id, title) for scenario_id, title in SCENARIOS]
-    figure, axes = plt.subplots(1, len(labels), figsize=(4 * len(labels), 4), sharey=True)
-    if len(labels) == 1:
-        axes = [axes]
-    for axis, (scenario_id, title) in zip(axes, labels):
-        values = sorted(demand_histograms[scenario_id].values(), reverse=True)
-        axis.bar(range(1, len(values) + 1), values, color='#4C72B0')
-        axis.set_title(title)
-        axis.set_xlabel('projects by demand rank')
-    axes[0].set_ylabel('top-K mentions count')
-    figure.suptitle('Распределение спроса на проекты по сценариям', y=1.02)
+    figure, axis = plt.subplots(figsize=(10, 4.5))
+    _plot_demand_concentration(axis, histograms)
+    figure.tight_layout()
+    return figure
+
+
+def build_assignment_comparison_figure(histograms: dict[str, dict[str, Counter]]):
+    import matplotlib.pyplot as plt
+
+    figure, axis = plt.subplots(figsize=(10, 4.5))
+    _plot_assignment_comparison(axis, histograms)
+    figure.tight_layout()
+    return figure
+
+
+def build_histograms_figure(histograms: dict[str, dict[str, Counter]]):
+    import matplotlib.pyplot as plt
+
+    figure, axes = plt.subplots(2, 1, figsize=(10, 9))
+    _plot_demand_concentration(axes[0], histograms)
+    _plot_assignment_comparison(axes[1], histograms)
     figure.tight_layout()
     return figure
 
@@ -461,39 +780,89 @@ def build_metrics_figure(metrics: list[dict]):
     axes = axes.ravel()
 
     chart_specs = (
-        ('hit_rate_at_5', 'HitRate@5', '#55A868'),
-        ('ndcg_at_5', 'NDCG@5', '#4C72B0'),
-        ('assigned_pct', 'Assigned, %', '#C44E52'),
-        ('capacity_utilization_pct', 'Capacity util., %', '#8172B2'),
-        ('blocking_pairs', 'Blocking pairs', '#CCB974'),
+        ('assigned_pct', 'Assigned, %'),
+        ('unassigned_students', 'Unassigned students'),
+        ('capacity_utilization_pct', 'Capacity util., %'),
+        ('filled_projects_pct', 'Filled projects, %'),
+        ('mean_student_rank_assigned', 'Mean assigned rank'),
+        ('blocking_pairs', 'Blocking pairs'),
     )
     x_positions = range(len(scenario_names))
-    for axis, (metric_key, title, color) in zip(axes, chart_specs):
+    bar_colors = [SCENARIO_COLORS.get(row['scenario_id'], '#888888') for row in metrics]
+    for axis, (metric_key, title) in zip(axes, chart_specs):
         values = [row[metric_key] for row in metrics]
-        axis.bar(x_positions, values, color=color)
+        axis.bar(x_positions, values, color=bar_colors)
         axis.set_title(title)
         axis.set_xticks(list(x_positions), scenario_names, rotation=25, ha='right')
-    axes[-1].axis('off')
     figure.suptitle('Метрики по сценариям', y=1.02)
     figure.tight_layout()
     return figure
 
 
-def show_experiment_plots(metrics: list[dict], demand_histograms: dict[str, Counter]) -> None:
+def build_recsys_metrics_figure(metrics: list[dict]):
     import matplotlib.pyplot as plt
 
-    build_demand_histogram_figure(demand_histograms)
+    k_values = [1, 5, 10, 20]
+    x_positions = np.arange(len(k_values))
+    n_scenarios = len(metrics)
+    width = 0.8 / max(n_scenarios, 1)
+    figure, axes = plt.subplots(1, 2, figsize=(15, 5), sharey=True)
+    for axis, metric_prefix, title in (
+        (axes[0], 'hit_rate_at', 'HitRate@K'),
+        (axes[1], 'ndcg_at', 'NDCG@K'),
+    ):
+        for offset, row in enumerate(metrics):
+            values = [row.get(f'{metric_prefix}_{k}', 0.0) for k in k_values]
+            scenario_id = row['scenario_id']
+            axis.bar(
+                x_positions + (offset - (n_scenarios - 1) / 2) * width,
+                values,
+                width=width,
+                label=row['scenario_name'],
+                color=SCENARIO_COLORS.get(scenario_id, '#888888'),
+            )
+        axis.set_title(title)
+        axis.set_xticks(x_positions, [f'@{k}' for k in k_values])
+        axis.legend(loc='upper right', fontsize=8)
+    figure.suptitle('Рекомендательные метрики по горизонтам K', y=1.02)
+    figure.tight_layout()
+    return figure
+
+
+def show_experiment_plots(metrics: list[dict], histograms: dict[str, dict[str, Counter]]) -> None:
+    import matplotlib.pyplot as plt
+
+    build_demand_concentration_figure(histograms)
+    build_assignment_comparison_figure(histograms)
+    build_recsys_metrics_figure(metrics)
     build_metrics_figure(metrics)
     plt.show()
 
 
-def save_histograms(path_png: Path, path_pdf: Path, demand_histograms: dict[str, Counter]) -> None:
+def _save_figure(path_png: Path, path_pdf: Path, figure) -> None:
     import matplotlib.pyplot as plt
 
-    figure = build_demand_histogram_figure(demand_histograms)
     figure.savefig(path_png, dpi=180, bbox_inches='tight')
     figure.savefig(path_pdf, bbox_inches='tight')
     plt.close(figure)
+
+
+def save_histograms(materials_dir: Path, histograms: dict[str, dict[str, Counter]]) -> None:
+    _save_figure(
+        materials_dir / 'first_choice_histograms.png',
+        materials_dir / 'first_choice_histograms.pdf',
+        build_demand_concentration_figure(histograms),
+    )
+    _save_figure(
+        materials_dir / 'assignment_histograms.png',
+        materials_dir / 'assignment_histograms.pdf',
+        build_assignment_comparison_figure(histograms),
+    )
+    _save_figure(
+        materials_dir / 'histograms.png',
+        materials_dir / 'histograms.pdf',
+        build_histograms_figure(histograms),
+    )
 
 
 def save_metrics_charts(path_png: Path, path_pdf: Path, metrics: list[dict]) -> None:
@@ -505,24 +874,111 @@ def save_metrics_charts(path_png: Path, path_pdf: Path, metrics: list[dict]) -> 
     plt.close(figure)
 
 
-def write_cases(path: Path, students: list[User], projects: list[Project], assignment_rows: list[dict]) -> None:
-    by_scenario = defaultdict(dict)
-    for row in assignment_rows:
-        by_scenario[row['scenario_id']][row['student_id']] = row['project_id']
+def save_recsys_metrics_charts(path_png: Path, path_pdf: Path, metrics: list[dict]) -> None:
+    import matplotlib.pyplot as plt
+
+    figure = build_recsys_metrics_figure(metrics)
+    figure.savefig(path_png, dpi=180, bbox_inches='tight')
+    figure.savefig(path_pdf, bbox_inches='tight')
+    plt.close(figure)
+
+
+def _score_breakdown(
+    student_index: int,
+    project_index: int,
+    rec_scores: np.ndarray,
+    prof_scores: np.ndarray,
+    components: dict[str, np.ndarray],
+) -> str:
+    return (
+        f"RecSys={rec_scores[student_index, project_index]:.3f}, "
+        f"ProfScore={prof_scores[student_index, project_index]:.3f}, "
+        f"tags={components['tags_overlap'][student_index, project_index]:.3f}, "
+        f"gpa={components['gpa_rel'][student_index, project_index]:.3f}, "
+        f"sem_rec={components['recsys_semantic'][student_index, project_index]:.3f}, "
+        f"sem_prof={components['teacher_semantic'][student_index, project_index]:.3f}"
+    )
+
+
+def write_cases(
+    path: Path,
+    students: list[User],
+    projects: list[Project],
+    scenario_preferences: dict[str, dict[int, list[int]]],
+    assignments: dict[str, dict[int, int]],
+    rec_scores: np.ndarray,
+    prof_scores: np.ndarray,
+    components: dict[str, np.ndarray],
+) -> None:
     project_titles = {project.pk: project.title for project in projects}
+    project_id_to_index = {project.pk: index for index, project in enumerate(projects)}
+    student_id_to_index = {student.pk: index for index, student in enumerate(students)}
     lines = ['# Cases', '']
-    changed = [
-        student for student in students
-        if by_scenario['recsys_only'].get(student.pk) != by_scenario['stable_matching'].get(student.pk)
-    ][:3]
-    for student in changed:
-        rec_project = by_scenario['recsys_only'].get(student.pk)
-        gs_project = by_scenario['stable_matching'].get(student.pk)
-        lines.append(
-            f'- Студент ID {student.pk}. В RecSys-only попадал в проект '
-            f'"{project_titles.get(rec_project, rec_project)}", а в Stable Matching был распределен в '
-            f'"{project_titles.get(gs_project, gs_project)}": первый проект оказался конкурентным по преподавательскому рангу и capacity.'
+
+    def recsys_rank(student_id: int, project_id: int | str | None) -> int | None:
+        if not project_id:
+            return None
+        prefs = scenario_preferences['recsys_only'].get(student_id, [])
+        return prefs.index(project_id) + 1 if project_id in prefs else None
+
+    scored_students = []
+    for student in students:
+        rec_project = assignments['recsys_only'].get(student.pk)
+        gs_project = assignments['stable_matching'].get(student.pk)
+        hybrid_project = assignments['hybrid'].get(student.pk)
+        if rec_project == gs_project == hybrid_project:
+            continue
+        rec_rank = recsys_rank(student.pk, rec_project) or 99
+        gs_rank = recsys_rank(student.pk, gs_project) or 99
+        hybrid_rank = recsys_rank(student.pk, hybrid_project) or 99
+        shift = max(abs(gs_rank - rec_rank), abs(hybrid_rank - rec_rank))
+        if not gs_project:
+            shift += 10
+        scored_students.append((shift, student.pk, student))
+
+    for _, _, student in sorted(scored_students, reverse=True)[:3]:
+        student_index = student_id_to_index[student.pk]
+        rec_project = assignments['recsys_only'].get(student.pk)
+        hybrid_project = assignments['hybrid'].get(student.pk)
+        gs_project = assignments['stable_matching'].get(student.pk)
+        grades = getattr(student, 'grades_json', {}) or {}
+        interests = ', '.join(tag.name for tag in student.interests.all()) or 'нет тегов'
+
+        lines.extend(
+            [
+                f'## Студент ID {student.pk} / cohort {synthetic_student_index(student)}',
+                '',
+                f'**Интересы:** {interests}',
+                '',
+                f'**Предметы и оценки:** {json.dumps(grades, ensure_ascii=False)}',
+                '',
+                f'**Bio:** {(student.bio or "").strip()[:700] or "не заполнено"}',
+                '',
+                f'- RecSys-only assignment: {project_titles.get(rec_project, "не распределен")} '
+                f'(rank={recsys_rank(student.pk, rec_project) or "—"})',
+                f'- Hybrid GS-first assignment: {project_titles.get(hybrid_project, "не распределен")} '
+                f'(rank={recsys_rank(student.pk, hybrid_project) or "—"})',
+                f'- Stable Matching assignment: {project_titles.get(gs_project, "не распределен")} '
+                f'(rank={recsys_rank(student.pk, gs_project) or "—"})',
+                '',
+            ]
         )
+
+        for label, project_id in (
+            ('RecSys-only', rec_project),
+            ('Hybrid', hybrid_project),
+            ('Stable Matching', gs_project),
+        ):
+            if not project_id:
+                lines.append(f'- {label}: студент остался нераспределен.')
+                continue
+            project_index = project_id_to_index[project_id]
+            lines.append(
+                f'- {label} score components for "{project_titles[project_id]}": '
+                f'{_score_breakdown(student_index, project_index, rec_scores, prof_scores, components)}.'
+            )
+        lines.append('')
+
     path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
@@ -531,16 +987,40 @@ def save_all_artifacts(
     config: Optional[ExperimentConfig] = None,
     ground_truth: Optional[dict[int, int]] = None,
     show_plots: bool = False,
-) -> tuple[list[dict], dict[str, Counter]]:
+) -> tuple[list[dict], dict[str, dict[str, Counter]]]:
     config = config or ExperimentConfig()
     students, projects = load_django_dataset(config)
-    metrics, assignment_rows, demand_histograms = run_experiments(students, projects, config, ground_truth)
+    (
+        metrics,
+        assignment_rows,
+        histograms,
+        scenario_preferences,
+        assignments,
+        rec_scores,
+        prof_scores,
+        components,
+        _ground_truth,
+    ) = run_experiments(students, projects, config, ground_truth)
     materials_dir.mkdir(parents=True, exist_ok=True)
     save_csv(materials_dir / 'results_table.csv', metrics)
     save_csv(materials_dir / 'scenario_assignments.csv', assignment_rows)
-    save_histograms(materials_dir / 'histograms.png', materials_dir / 'histograms.pdf', demand_histograms)
+    save_histograms(materials_dir, histograms)
     save_metrics_charts(materials_dir / 'metrics_charts.png', materials_dir / 'metrics_charts.pdf', metrics)
-    write_cases(materials_dir / 'cases.md', students, projects, assignment_rows)
+    save_recsys_metrics_charts(
+        materials_dir / 'recsys_metrics_charts.png',
+        materials_dir / 'recsys_metrics_charts.pdf',
+        metrics,
+    )
+    write_cases(
+        materials_dir / 'cases.md',
+        students,
+        projects,
+        scenario_preferences,
+        assignments,
+        rec_scores,
+        prof_scores,
+        components,
+    )
     if show_plots:
-        show_experiment_plots(metrics, demand_histograms)
-    return metrics, demand_histograms
+        show_experiment_plots(metrics, histograms)
+    return metrics, histograms
