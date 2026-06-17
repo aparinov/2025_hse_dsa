@@ -26,6 +26,13 @@ def _user_text(user):
 
 
 def run_compute_embeddings(stdout=None):
+    try:
+        encode_texts(['dependency check'])
+    except Exception as exc:
+        if stdout:
+            stdout.write(f'Эмбеддинги пропущены: {exc}')
+        return
+
     tags = list(Tag.objects.all().order_by('pk'))
     if tags:
         vectors = encode_texts([t.name for t in tags])

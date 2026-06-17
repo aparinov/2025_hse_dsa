@@ -52,8 +52,13 @@ def rebuild_grade_profile(user) -> dict[str, float]:
         User.objects.filter(pk=user.pk).update(grade_profile={})
         return {}
 
-    tag_matrix = ensure_tag_embeddings(tags)
+    try:
+        tag_matrix = ensure_tag_embeddings(tags)
+    except Exception:
+        tag_matrix = None
+
     buckets: dict[int, list[float]] = defaultdict(list)
+    tag_by_name = {tag.name.casefold(): index for index, tag in enumerate(tags)}
 
     for subject, raw_grade in grades.items():
         if subject is None or raw_grade in (None, ''):
@@ -66,11 +71,22 @@ def rebuild_grade_profile(user) -> dict[str, float]:
         except (TypeError, ValueError):
             continue
         grade_val = max(0.0, min(grade_val, 10.0))
-        subj_vec = encode_text(subject_text)
-        sims = tag_matrix @ subj_vec
-        best_idx = int(np.argmax(sims))
-        if sims[best_idx] < SUBJECT_TAG_COSINE_THRESHOLD:
-            continue
+        if tag_matrix is None:
+            best_idx = tag_by_name.get(subject_text.casefold())
+            if best_idx is None:
+                continue
+        else:
+            try:
+                subj_vec = encode_text(subject_text)
+            except Exception:
+                best_idx = tag_by_name.get(subject_text.casefold())
+                if best_idx is None:
+                    continue
+            else:
+                sims = tag_matrix @ subj_vec
+                best_idx = int(np.argmax(sims))
+                if sims[best_idx] < SUBJECT_TAG_COSINE_THRESHOLD:
+                    continue
         buckets[best_idx].append(grade_val)
 
     profile: dict[str, float] = {}

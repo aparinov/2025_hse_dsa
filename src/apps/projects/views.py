@@ -3,6 +3,7 @@ from urllib.parse import urlencode
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db import connection
 from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
@@ -45,7 +46,16 @@ class ProjectListView(ListView):
             self.search_query = form.cleaned_data.get(self.search_query_param, '').strip()
 
         if self.search_query:
-            queryset = queryset.filter(title__icontains=self.search_query)
+            if connection.vendor == 'sqlite':
+                search_query = self.search_query.casefold()
+                matching_ids = [
+                    project_id
+                    for project_id, title in queryset.values_list('pk', 'title')
+                    if search_query in title.casefold()
+                ]
+                queryset = queryset.filter(pk__in=matching_ids)
+            else:
+                queryset = queryset.filter(title__icontains=self.search_query)
 
         if self.active_tag:
             queryset = queryset.filter(tags=self.active_tag).distinct()

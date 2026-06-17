@@ -400,13 +400,6 @@ def _rerank_gs_first(recsys_prefs: dict[int, list[int]], gs_assignment: dict[int
     return reranked
 
 
-def _rerank_assignment_first(
-    base_prefs: dict[int, list[int]],
-    assignment: dict[int, int],
-) -> dict[int, list[int]]:
-    return _rerank_gs_first(base_prefs, assignment)
-
-
 def _rerank_by_professor_acceptance(
     students: list[User],
     projects: list[Project],
@@ -508,6 +501,7 @@ def run_experiments(
     dict[str, dict[str, Counter]],
     dict[str, dict[int, list[int]]],
     dict[str, dict[int, int]],
+    dict[str, dict[int, list[int]]],
     np.ndarray,
     np.ndarray,
     dict[str, np.ndarray],
@@ -608,25 +602,11 @@ def run_experiments(
         application_preferences['hybrid'],
         capacities,
     )
-    effective_preferences = dict(scenario_preferences)
-    effective_preferences['recsys_prof_rank'] = _rerank_assignment_first(
-        scenario_preferences['recsys_prof_rank'],
-        assignments['recsys_prof_rank'],
-    )
-    effective_preferences['hybrid'] = _rerank_assignment_first(
-        scenario_preferences['hybrid'],
-        assignments['hybrid'],
-    )
-    effective_preferences['stable_matching'] = _rerank_assignment_first(
-        scenario_preferences['recsys_only'],
-        assignments['stable_matching'],
-    )
 
     metrics = []
     assignment_rows = []
     histograms = {'first_choice': {}, 'assignments': {}}
     for scenario_id, scenario_name in SCENARIOS:
-        prefs = effective_preferences[scenario_id]
         ranking_prefs = scenario_preferences[scenario_id]
         application_prefs = application_preferences[scenario_id]
         assignment = assignments[scenario_id]
@@ -637,7 +617,7 @@ def run_experiments(
                 students,
                 capacities,
                 assignment,
-                prefs,
+                ranking_prefs,
                 project_prefs,
                 ground_truth,
                 config.metrics_k,
@@ -666,7 +646,18 @@ def run_experiments(
                     ),
                 }
             )
-    return metrics, assignment_rows, histograms, scenario_preferences, assignments, rec_scores, prof_scores, components, ground_truth
+    return (
+        metrics,
+        assignment_rows,
+        histograms,
+        scenario_preferences,
+        assignments,
+        application_preferences,
+        rec_scores,
+        prof_scores,
+        components,
+        ground_truth,
+    )
 
 
 def save_csv(path: Path, rows: list[dict]) -> None:
@@ -676,6 +667,33 @@ def save_csv(path: Path, rows: list[dict]) -> None:
         writer = csv.DictWriter(file, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
+
+
+def _preference_rows(
+    preferences_by_scenario: dict[str, dict[int, list[int]]],
+    owner_column: str,
+    item_column: str,
+) -> list[dict]:
+    rows = []
+    for scenario_id, preferences in preferences_by_scenario.items():
+        for owner_id, item_ids in sorted(preferences.items()):
+            for rank, item_id in enumerate(item_ids, start=1):
+                rows.append(
+                    {
+                        'scenario_id': scenario_id,
+                        owner_column: owner_id,
+                        'rank': rank,
+                        item_column: item_id,
+                    }
+                )
+    return rows
+
+
+def _ground_truth_rows(ground_truth: dict[int, int]) -> list[dict]:
+    return [
+        {'student_id': student_id, 'ideal_project_id': project_id}
+        for student_id, project_id in sorted(ground_truth.items())
+    ]
 
 
 HISTOGRAM_TOP_PROJECTS = 35
@@ -996,6 +1014,7 @@ def save_all_artifacts(
         histograms,
         scenario_preferences,
         assignments,
+        application_preferences,
         rec_scores,
         prof_scores,
         components,
@@ -1004,6 +1023,23 @@ def save_all_artifacts(
     materials_dir.mkdir(parents=True, exist_ok=True)
     save_csv(materials_dir / 'results_table.csv', metrics)
     save_csv(materials_dir / 'scenario_assignments.csv', assignment_rows)
+    save_csv(
+        materials_dir / 'scenario_preferences.csv',
+        _preference_rows(scenario_preferences, 'student_id', 'project_id'),
+    )
+    save_csv(
+        materials_dir / 'application_preferences.csv',
+        _preference_rows(application_preferences, 'student_id', 'project_id'),
+    )
+    save_csv(
+        materials_dir / 'project_preferences.csv',
+        _preference_rows(
+            {'teacher_rank': _project_preferences(students, projects, prof_scores)},
+            'project_id',
+            'student_id',
+        ),
+    )
+    save_csv(materials_dir / 'ground_truth.csv', _ground_truth_rows(_ground_truth))
     save_histograms(materials_dir, histograms)
     save_metrics_charts(materials_dir / 'metrics_charts.png', materials_dir / 'metrics_charts.pdf', metrics)
     save_recsys_metrics_charts(

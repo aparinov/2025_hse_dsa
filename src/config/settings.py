@@ -67,16 +67,25 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('POSTGRES_DB', 'cusrach_db'),
-        'USER': os.getenv('POSTGRES_USER', 'cusrach_user'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'cusrach_pass'),
-        'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
-        'PORT': os.getenv('POSTGRES_PORT', '5432'),
+SQLITE_DB_PATH = os.getenv('SQLITE_DB_PATH')
+if SQLITE_DB_PATH:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': SQLITE_DB_PATH,
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB', 'cusrach_db'),
+            'USER': os.getenv('POSTGRES_USER', 'cusrach_user'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD', 'cusrach_pass'),
+            'HOST': os.getenv('POSTGRES_HOST', 'localhost'),
+            'PORT': os.getenv('POSTGRES_PORT', '5432'),
+        }
+    }
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
@@ -153,4 +162,3 @@ PROJECT_TAG_SUBJECTS = {
     'Strategy': ['Strategic Management', 'Business Analytics', 'Economics'],
     'Web Development': ['Web Development', 'Python', 'Databases', 'JavaScript'],
 }
-

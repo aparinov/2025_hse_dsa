@@ -1,4 +1,6 @@
-from collections import defaultdict
+import math
+import re
+from collections import Counter, defaultdict
 
 import numpy as np
 from django.contrib.auth import get_user_model
@@ -31,6 +33,20 @@ def _eligible_recommendation_projects(user):
 
 def _normalize_text(value):
     return (value or '').strip().casefold()
+
+
+def _tokens(value):
+    return Counter(re.findall(r'[\wа-яА-ЯёЁ]+', _normalize_text(value)))
+
+
+def _cosine_counts(left, right):
+    if not left or not right:
+        return 0.0
+    common = set(left) & set(right)
+    numerator = sum(left[token] * right[token] for token in common)
+    left_norm = math.sqrt(sum(value * value for value in left.values()))
+    right_norm = math.sqrt(sum(value * value for value in right.values()))
+    return numerator / (left_norm * right_norm)
 
 
 def _project_text(project):
@@ -156,13 +172,26 @@ def _collaborative_scores(user, projects):
 
 
 def _semantic_scores(user, projects):
-    user_emb = _ensure_user_embedding(user)
+    try:
+        user_emb = _ensure_user_embedding(user)
+    except Exception:
+        user_emb = None
+
     if user_emb is None:
-        return {}
+        user_tokens = _tokens(_user_text(user))
+        return _normalize_scores(
+            {
+                project.pk: _cosine_counts(user_tokens, _tokens(_project_text(project)))
+                for project in projects
+            }
+        )
 
     scores = {}
     for project in projects:
-        proj_emb = _ensure_project_embedding(project)
+        try:
+            proj_emb = _ensure_project_embedding(project)
+        except Exception:
+            proj_emb = None
         if proj_emb is None:
             continue
         similarity = float(np.dot(user_emb, proj_emb))
